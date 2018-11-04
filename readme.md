@@ -9,7 +9,7 @@ The library is header only, that means to use it you just have to include the fi
 
 ##### Quick start
 
-To throw and exception the class ee::ExceptionThrower is used. It builds the exception with all needed information.
+To throw an exception the class ee::ExceptionThrower is used. It builds the exception with all needed information.
 
     ee::ExceptionThrower e(__PRETTY_FUNCTION__);
     e << "My custom error message"
@@ -27,6 +27,12 @@ Define a custom exception like this
 Only this line changes
 
     throw e.build<MyCustomException>();
+
+##### Set output format
+
+Currently there are two output formats 'String' and 'Json'
+
+    throw e.build(ee::ExceptionThrower::OutputFormat::Json);
 
 ### Hints
 
