@@ -18,3 +18,11 @@ target_link_libraries(SimpleException dl)
 ### Custom Exception
 add_executable(CustomException examples/CustomException.cpp )
 target_link_libraries(CustomException dl)
+
+### Json Exception
+add_executable(JsonException examples/JsonException.cpp )
+target_link_libraries(JsonException dl)
+
+### Test multiple includes of the exception header file in the same project
+add_executable(TestMultipleIncludes tests/multipleincludes/main.cpp tests/multipleincludes/SampleOne.cpp tests/multipleincludes/SampleOne.h tests/multipleincludes/SampleTwo.cpp tests/multipleincludes/SampleTwo.h tests/multipleincludes/SampleThree.cpp tests/multipleincludes/SampleThree.h)
+target_link_libraries(TestMultipleIncludes dl)

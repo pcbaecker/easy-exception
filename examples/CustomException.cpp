@@ -1,17 +1,22 @@
-#include <iostream>
+#include <Exception.hpp>
 
-#include "../include/Exception.hpp"
-
-class MyCustomException : public ee::Exception<16> {
-public:
-    MyCustomException(std::string caller, std::string method) :
-    ee::Exception<16>(std::move(caller), std::move(method)) {}
-};
+DEFINE_EXCEPTION(MyCustomException);
 
 class SampleTwo {
 public:
     int doFifth(const std::string& s) {
-        throw MyCustomException(__PRETTY_FUNCTION__, "My custom error occured - " + s);
+
+        // Create the exception thrower object that helps collecting data
+        ee::ExceptionThrower e(__PRETTY_FUNCTION__);
+
+        // Provide our custom error message
+        e << "My custom error occured"
+
+        // Provide a key-value pair of information
+        << ee::Info("Given string", s);
+
+        // Build the custom exception and throw it
+        throw e.build<MyCustomException>();
     }
     int doFourth(const char* c) {
         return doFifth("some c++ string");
@@ -39,11 +44,17 @@ int main() {
 
         return EXIT_SUCCESS;
     } catch (MyCustomException& e) {
+
+        // Catch the custom exception here
         std::cerr << "Catched my custom exception -->" << std::endl << std::endl;
         std::cerr << e.what() << std::endl;
+
+        return EXIT_FAILURE;
+    } catch (std::runtime_error& e) {
+        std::cerr << "std::runtime_error" << std::endl;
         return EXIT_FAILURE;
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "std::exception" << std::endl;
         return EXIT_FAILURE;
     } catch (...) {
         std::cerr << "Unknown exception" << std::endl;

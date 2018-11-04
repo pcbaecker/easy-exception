@@ -10,13 +10,13 @@ public:
         // Provide a custom error message
         e << s
 
-        // Provide some user specific key-value pairs of information
-        << ee::Info("Username", "John Doe")
-        << ee::Info("UserId", 314)
-        << ee::Info("Credit", 24.531);
+          // Provide some user specific key-value pairs of information
+          << ee::Info("Username", "John Doe")
+          << ee::Info("UserId", 314)
+          << ee::Info("Credit", 24.531);
 
         // Build and throw the default exception
-        throw e.build();
+        throw e.build(ee::ExceptionThrower::OutputFormat::Json);
     }
     int doFourth(const char* c) {
         return doFifth("some c++ string");

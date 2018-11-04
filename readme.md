@@ -9,9 +9,19 @@ The library is header only, that means to use it you just have to include the fi
 
 ### Hints
 
+##### Compiler
+
 In order to print a readable stacktrace, you may must provide the '-rdynamic' flag to your compiler and link against dl.
 
 In cmake:
 
     set(CMAKE_CXX_FLAGS -rdynamic)
     target_link_libraries(MyApp dl)
+
+##### Global settings
+
+To globally set the output format you can define EASY_EXCEPTION_OUTPUT_FORMAT to String or Json.
+
+In cmake:
+
+    add_compile_definitions(EASY_EXCEPTION_OUTPUT_FORMAT=Json)
