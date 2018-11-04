@@ -7,6 +7,27 @@ This framework is intended be easy to use and provide exceptions with stacktrace
 In the folder examples/ you can find some examples on how to use the stacktrace or exception classes.
 The library is header only, that means to use it you just have to include the files contained in the include/ directory.
 
+##### Quick start
+
+To throw and exception the class ee::ExceptionThrower is used. It builds the exception with all needed information.
+
+    ee::ExceptionThrower e(__PRETTY_FUNCTION__);
+    e << "My custom error message"
+    << ee::Info("Username", "John Doe")
+    << ee::Info("UserId", 314)
+    << ee::Info("Credit", 24.531);
+    throw e.build();
+
+##### Custom exception
+
+Define a custom exception like this
+
+    DEFINE_EXCEPTION(MyCustomException);
+
+Only this line changes
+
+    throw e.build<MyCustomException>();
+
 ### Hints
 
 ##### Compiler
