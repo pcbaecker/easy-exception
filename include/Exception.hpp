@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <chrono>
+#include <list>
 #include <cstring>
 
 #include "Stacktrace.hpp"
@@ -20,38 +21,38 @@ namespace ee {
      */
     struct Info {
     public:
-        explicit Info(std::string name, std::string value)
-                : mName(std::move(name)), mValue(std::move(value)) {}
+        explicit Info(std::string name, std::string value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::move(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, uint8_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, uint8_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, int8_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, int8_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, uint16_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, uint16_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, int16_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, int16_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, uint32_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, uint32_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, int32_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, int32_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, uint64_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, uint64_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, int64_t value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, int64_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, float value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, float value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Info(std::string name, double value)
-                : mName(std::move(name)), mValue(std::to_string(value)) {}
+        explicit Info(std::string name, double value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
         const std::string& getName() const noexcept {
             return this->mName;
@@ -59,6 +60,10 @@ namespace ee {
 
         const std::string& getValue() const noexcept {
             return this->mValue;
+        }
+
+        const std::string& getCaller() const noexcept {
+            return this->mCaller;
         }
 
     private:
@@ -71,12 +76,17 @@ namespace ee {
          * @brief The value of the info.
          */
         std::string mValue;
+
+        /**
+         * @brief The value of the caller
+         */
+        std::string mCaller;
     };
 
     /**
      * @brief The base class for all exceptions, which is itself is based on std::exception.
      */
-    class ExceptionThrower {
+    class Exception : public std::exception {
     public:
         enum OutputFormat {String, Json};
 
@@ -85,10 +95,28 @@ namespace ee {
          *
          * @param caller The caller of this exception (typically __PRETTY_FUNCTION__).
          */
-        explicit ExceptionThrower(std::string caller) noexcept :
+        explicit Exception(
+                std::string caller,
+                std::string message,
+                std::list<ee::Info> infos,
+                OutputFormat format = OutputFormat::EASY_EXCEPTION_OUTPUT_FORMAT
+                        ) noexcept :
         mCaller(std::move(caller)),
-        mTimepoint(std::chrono::system_clock::now()) {
+        mMessage(std::move(message)),
+        mInfos(std::move(infos)),
+        mTimepoint(std::chrono::system_clock::now()),
+        mFormat(format) {
+            this->update();
+        }
 
+        Exception(const Exception& e) noexcept :
+        mCaller(e.mCaller),
+        mTimepoint(e.mTimepoint),
+        mMessage(e.mMessage),
+        mStacktrace(e.mStacktrace),
+        mInfos(e.mInfos),
+        mFormat(e.mFormat) {
+            this->update();
         }
 
         /**
@@ -96,15 +124,15 @@ namespace ee {
          *
          * @param message The message to be stored.
          * @return Reference to this.
-         */
-        ExceptionThrower& operator<<(std::string message) noexcept {
+         *
+        Exception& operator<<(std::string message) noexcept {
             try {
                 this->mMessage = std::move(message);
             } catch (...) {
                 std::cerr << __PRETTY_FUNCTION__ << ": Could not store message" << std::endl;
             }
             return *this;
-        }
+        }*/
 
         /**
          * @brief Reads an key-value-pair in and stores the values.
@@ -112,15 +140,17 @@ namespace ee {
          * @param info The info object that provides the information that will be stored.
          * @return Reference to this.
          */
-        ExceptionThrower&operator<<(const Info& info) noexcept {
+        Exception&operator<<(const Info& info) noexcept {
             try {
-                this->mInfos[info.getName()] = info.getValue();
+                this->mInfos.emplace_back(info);
+                this->update();
             } catch (...) {
                 std::cerr << __PRETTY_FUNCTION__ << ": Could not store info" << std::endl;
             }
             return *this;
         }
 
+    private:
         /**
          * @brief Builds the exception and returns it.
          *
@@ -128,21 +158,26 @@ namespace ee {
          * @param format The output format to use.
          * @return The completly built exception.
          */
-        template<typename T = std::runtime_error> T build(OutputFormat format = OutputFormat::EASY_EXCEPTION_OUTPUT_FORMAT) const noexcept {
+        void update() noexcept {
             try {
+                // Clear the cache
+                this->mCache.clear();
+                auto& str = this->mCache;
+
+                // Format datetime to string
                 char datetime[128];
                 auto time = std::chrono::system_clock::to_time_t(this->mTimepoint);
                 if (!std::strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S", std::localtime(&time))) {
                     strcpy(datetime, "Unknown");
                 }
 
-                std::string str;
-                switch (format) {
+                // Determine the format
+                switch (this->mFormat) {
                     default:
                     case String: {
                         // Format output as string
                         str += "Exception type:\n";
-                        str += "\t" + std::string(typeid(T).name()) + "\n";
+                        str += "\t" + std::string(typeid(this).name()) + "\n";
                         str += "Datetime:\n";
                         str += "\t" + std::string(datetime) + "\n";
                         if (!this->mCaller.empty()) {
@@ -155,8 +190,8 @@ namespace ee {
                         }
                         if (!this->mInfos.empty()) {
                             for (const auto& info : this->mInfos) {
-                                str += info.first + ":\n";
-                                str += "\t" + info.second + "\n";
+                                str += info.getName() + (!info.getCaller().empty() ? " { " + info.getCaller() + " }" : "") + ":\n";
+                                str += "\t" + info.getValue() + "\n";
                             }
                         }
                         if (!this->mStacktrace.getLines().empty()) {
@@ -168,7 +203,7 @@ namespace ee {
                     case Json: {
                         // Format output as json
                         str += "{\n";
-                        str += "\"type\" : \"" + std::string(typeid(T).name()) + "\"";
+                        str += "\"type\" : \"" + std::string(typeid(this).name()) + "\"";
                         str += ",\n\"datetime\" : \"" + std::string(datetime) + "\"";
                         if (!this->mCaller.empty()) {
                             str += ",\n\"method\" : \"" + this->mCaller + "\"";
@@ -180,7 +215,10 @@ namespace ee {
                             str += ",\n\"infos\" : [\n";
                             uint16_t i = 0;
                             for (const auto& info : this->mInfos) {
-                                str += "\t{\"" + info.first + "\" : \"" + info.second + "\"}";
+                                str += "\t{\"name\" : \"" + info.getName() + "\",\n";
+                                str += "\t\"value\" : \"" + info.getValue() + "\",\n";
+                                str += "\t\"caller\" : " + (info.getCaller().empty() ? "null\n" : "\"" + info.getCaller() + "\"\n");
+                                str += "\t}";
                                 if (++i < this->mInfos.size()) {
                                     str += ",";
                                 }
@@ -203,14 +241,26 @@ namespace ee {
                         str += "\n}";
                     }
                 }
-
-                return T(str);
             } catch (...) {
-                return T("Could not build message");
+                std::cerr << __PRETTY_FUNCTION__ << ": Could not build message" << std::endl;
             }
         }
 
+        const char *what() const noexcept override {
+            return this->mCache.c_str();
+        }
+
     private:
+        /**
+         * @brief Defines the output format of this exception.
+         */
+        OutputFormat mFormat;
+
+        /**
+         * @brief Holds the cache of the compiled message.
+         */
+        std::string mCache;
+
         /**
          * @brief Holds the base message provided by the caller.
          */
@@ -224,7 +274,7 @@ namespace ee {
         /**
          * @brief Holds information stored by key-value pairs.
          */
-        std::map<std::string,std::string> mInfos;
+        std::list<Info> mInfos;
 
         /**
          * @brief Holds the stacktrace.
@@ -241,6 +291,6 @@ namespace ee {
 /**
  * @brief Helps defining an custom exception.
  */
-#define DEFINE_EXCEPTION(name) class name : public std::runtime_error {public:explicit name(const std::string &s):std::runtime_error(s){}}
+#define DEFINE_EXCEPTION(name) class name : public ee::Exception {public:explicit name(const std::string &caller, const std::string& message, const std::list<ee::Info>& info):ee::Exception(caller,message,info){}}
 
 #endif

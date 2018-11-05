@@ -9,24 +9,61 @@ The library is header only, that means to use it you just have to include the fi
 
 ##### Quick start
 
-To throw an exception the class ee::ExceptionThrower is used. It builds the exception with all needed information.
+An Exception is thrown with the base ee::Exception that inherits from std::exception. It collects the interesting information and stores it:
 
-    ee::ExceptionThrower e(__PRETTY_FUNCTION__);
-    e << "My custom error message"
-    << ee::Info("Username", "John Doe")
-    << ee::Info("UserId", 314)
-    << ee::Info("Credit", 24.531);
-    throw e.build();
+    throw ee::Exception(__PRETTY_FUNCTION__, "My custom message", {
+        ee::Info("Username", "John Doe"),
+        ee::Info("UserId", 314),
+        ee::Info("Credit", 24.531),
+        ee::Info("std::string s", s, __PRETTY_FUNCTION__)
+    });
+
+In some method that catches the exception and passes it the stack up in the caller hierarchy you can add another custom infos:
+
+    try {
+        ...
+    } catch (ee::Exception& e) {
+        e << ee::Info("Provided float", f, __PRETTY_FUNCTION__);
+        throw;
+    }
+    
+The catched std::exception will print an output like the following:
+    
+    Exception type:
+    	PN2ee9ExceptionE
+    Datetime:
+    	2018-11-05 14:32:44
+    In method:
+    	int SampleTwo::doFifth(const string&)
+    With message:
+    	My custom message
+    Username:
+    	John Doe
+    UserId:
+    	314
+    Credit:
+    	24.531000
+    std::string s { int SampleTwo::doFifth(const string&) }:
+    	some c++ string
+    Provided float { int SampleOne::doSecond(float) }:
+    	22.000000
+    Stacktrace:
+    [0] ee::Stacktrace<(unsigned short)32>::Stacktrace()
+    [1] ee::Exception::Exception(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::list<ee::Info, std::allocator<ee::Info> >, ee::Exception::OutputFormat)
+    [2] SampleTwo::doFifth(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+    [3] SampleTwo::doFourth(char const*)
+    [4] SampleOne::doThird(double)
+    [5] SampleOne::doSecond(float)
+    [6] SampleOne::doFirst(int, int)
+    [7] main
+    [8] __libc_start_main
+    [9] _start
 
 ##### Custom exception
 
-Define a custom exception like this
+Define a custom exception and create it instead of ee::Exception
 
     DEFINE_EXCEPTION(MyCustomException);
-
-Only this line changes
-
-    throw e.build<MyCustomException>();
 
 ##### Set output format
 

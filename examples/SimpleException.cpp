@@ -3,20 +3,14 @@
 class SampleTwo {
 public:
     int doFifth(const std::string& s) {
-
-        // Create the exception thrower class that helps us collecting data
-        ee::ExceptionThrower e(__PRETTY_FUNCTION__);
-
-        // Provide a custom error message
-        e << s
-
-        // Provide some user specific key-value pairs of information
-        << ee::Info("Username", "John Doe")
-        << ee::Info("UserId", 314)
-        << ee::Info("Credit", 24.531);
-
-        // Build and throw the default exception
-        throw e.build();
+        // Create the exception with caller method and message
+        throw ee::Exception(__PRETTY_FUNCTION__, "My custom message", {
+            // Provide a list of custom infos
+            ee::Info("Username", "John Doe"),
+            ee::Info("UserId", 314),
+            ee::Info("Credit", 24.531),
+            ee::Info("std::string s", s, __PRETTY_FUNCTION__)
+        });
     }
     int doFourth(const char* c) {
         return doFifth("some c++ string");
@@ -30,7 +24,12 @@ public:
         return sampleTwo.doFourth("some c string");
     }
     int doSecond(float f) {
-        return doThird(f * 10.0f);
+        try {
+            return doThird(f * 10.0f);
+        } catch (ee::Exception& e) {
+            e << ee::Info("Provided float", f, __PRETTY_FUNCTION__);
+            throw;
+        }
     }
     int doFirst(int a, int b) {
         return doSecond(a + b);
