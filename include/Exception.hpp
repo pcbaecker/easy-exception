@@ -54,6 +54,11 @@ namespace ee {
         explicit Info(std::string name, double value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
+#ifdef __APPLE__
+        explicit Info(std::string name, size_t value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+#endif
+
         const std::string& getName() const noexcept {
             return this->mName;
         }
