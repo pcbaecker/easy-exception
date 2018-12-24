@@ -9,6 +9,7 @@
 
 namespace ee {
 
+#ifndef __EMSCRIPTEN__
     /**
      * @brief This struct helps to keep track of the current state on the stack.
      */
@@ -36,6 +37,7 @@ namespace ee {
         }
         return _URC_NO_REASON;
     }
+#endif
 
     /**
      * @brief This template class stores the current stacktrace.
@@ -47,6 +49,7 @@ namespace ee {
          * @brief Constructor.
          */
         Stacktrace() {
+#ifndef __EMSCRIPTEN__
             // The buffer used to store the traces
             void* buffer[MAX_NUMBER_OF_TRACES];
 
@@ -84,6 +87,7 @@ namespace ee {
                 if (demangled != nullptr)
                     free(demangled);
             }
+#endif
         }
 
         /**
