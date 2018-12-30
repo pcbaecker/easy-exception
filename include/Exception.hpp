@@ -54,7 +54,7 @@ namespace ee {
         explicit Info(std::string name, double value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
         explicit Info(std::string name, size_t value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 #endif
