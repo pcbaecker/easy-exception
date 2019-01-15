@@ -5,6 +5,8 @@
 #include <list>
 #include <thread>
 #include <mutex>
+#include <functional>
+#include <atomic>
 
 #include "LogEntry.hpp"
 
@@ -48,17 +50,49 @@ namespace ee {
          */
         static size_t getNumberOfLogEntries() noexcept;
 
+        /**
+         * @brief Registers the given callback for the given LogLevel.
+         *
+         * @param logLevel The LogLevel to register the callback.
+         * @param callback The callback to be executed for the given LogLevel.
+         */
+        static void registerCallback(LogLevel logLevel, std::function<void(const LogEntry&)> callback) noexcept;
+
+        /**
+         * @brief Returns a map containing the callback-LogLevel map.
+         *
+         * @return Reference to the callback-LogLevel map.
+         */
+        static const std::map<LogLevel,std::function<void(const LogEntry&)>>& getCallbackMap() noexcept;
+
+        /**
+         * @brief Removes all registered callbacks.
+         */
+        static void removeCallbacks() noexcept;
+
     private:
         /**
          * @brief The mutex that manages the log-thread map. It must be locked every time the LogThreadMap
          * is queried or modified.
          */
-        static std::mutex Mutex;
+        static std::recursive_mutex Mutex;
 
         /**
          * @brief The log-thread map that contains a list of LogEntries for each thread.
          */
         static std::map<std::thread::id, std::list<LogEntry>> LogThreadMap;
+
+        /**
+         * @brief This map can hold a single callback for each LogLevel.
+         */
+        static std::map<LogLevel,std::function<void(const LogEntry&)>> CallbackMap;
+
+        /**
+         * @brief This boolean variable can be set to true to suspend logging for a short time period.
+         *
+         * Necessary for preventing the generation of log entries during the execution of a callback and possible reset().
+         */
+        static std::atomic_bool SuspendLogging;
     };
 
 }

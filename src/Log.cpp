@@ -4,8 +4,10 @@
 
 namespace ee {
 
-    std::mutex Log::Mutex;
+    std::recursive_mutex Log::Mutex;
+    std::atomic_bool Log::SuspendLogging = false;
     std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
+    std::map<LogLevel,std::function<void(const LogEntry&)>> Log::CallbackMap;
 
     void Log::log(
             LogLevel logLevel,
@@ -18,14 +20,25 @@ namespace ee {
         // Check if a pointer to the list is already generated
         if (pList == nullptr) {
             // We thave to get the list pointer for this thread, we modify the parent map and that requires concurrent logic
-            std::lock_guard<std::mutex> mutex(Log::Mutex);
+            std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
 
             // Get and possibly create the list pointer for this thread, store it in the list pointer
             pList = &Log::LogThreadMap[std::this_thread::get_id()];
         }
 
+        // For a short period of time we may suspend the creation of logs
+        if (SuspendLogging) {
+            return;
+        }
+
         // Create a LogEntry in the thread specific list
-        pList->emplace_back(logLevel, classname, method, message, std::chrono::system_clock::now());
+        auto& logEntry = pList->emplace_back(logLevel, classname, method, message, std::chrono::system_clock::now());
+
+        // Check if we have a callback function for this LogLevel
+        if (CallbackMap.count(logLevel)) {
+            // Execute the callback
+            CallbackMap.at(logLevel)(logEntry);
+        }
     }
 
     const std::map<std::thread::id, std::list<LogEntry>> &Log::getLogThreadMap() noexcept {
@@ -36,7 +49,7 @@ namespace ee {
         size_t numberOfLogEntries = 0;
 
         // Iterating over the parent map, that means we have to use concurrent logic
-        std::lock_guard<std::mutex> mutex(Log::Mutex);
+        std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
 
         // Iterate through the different threads
         for (auto& thread : LogThreadMap) {
@@ -48,8 +61,11 @@ namespace ee {
     }
 
     void Log::reset() noexcept {
+        // Suspend logging for the time of the reset
+        SuspendLogging = true;
+
         // Modifying the parent map, that means we have to use concurrent logic
-        std::lock_guard<std::mutex> mutex(Log::Mutex);
+        std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
 
         // Iterate through the different threads
         for (auto& thread : Log::LogThreadMap) {
@@ -57,6 +73,20 @@ namespace ee {
             // and we would make them invalid. Instead we just clear each list and the pointers remain valid.
             thread.second.clear();
         }
+
+        // Reset is done, we can resume creating logs
+        SuspendLogging = false;
     }
 
+    void Log::registerCallback(LogLevel logLevel, std::function<void(const LogEntry &)> callback) noexcept {
+        CallbackMap[logLevel] = std::move(callback);
+    }
+
+    const std::map<LogLevel, std::function<void(const LogEntry &)>> &Log::getCallbackMap() noexcept {
+        return CallbackMap;
+    }
+
+    void Log::removeCallbacks() noexcept {
+        CallbackMap.clear();
+    }
 }
