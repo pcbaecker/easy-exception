@@ -1,4 +1,4 @@
-#include <Exception.hpp>
+#include <ee/Exception.hpp>
 
 DEFINE_EXCEPTION(MyCustomException);
 

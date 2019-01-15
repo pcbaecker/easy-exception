@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Stacktrace.hpp>
+#include <ee/Stacktrace.hpp>
 
 std::string goo(int a) {
     ee::Stacktrace<16> stacktrace;
