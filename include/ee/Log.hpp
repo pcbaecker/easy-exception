@@ -24,8 +24,14 @@ namespace ee {
          * @param classname The classname of the log entry.
          * @param method The method name of the log entry.
          * @param message The message of the log entry.
+         * @param notes A list of notes for the log entry.
          */
-        static void log(LogLevel logLevel, const std::string& classname, const std::string& method, const std::string& message) noexcept;
+        static void log(
+                LogLevel logLevel,
+                const std::string& classname,
+                const std::string& method,
+                const std::string& message,
+                const std::vector<Note>& notes) noexcept;
 
         /**
          * @brief Returns a reference to the log-thread map. Using it can be critical due to the multi-threaded-nature of this framework.

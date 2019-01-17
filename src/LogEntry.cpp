@@ -7,11 +7,13 @@ namespace ee {
             const std::string &classname,
             const std::string &method,
             const std::string &message,
+            const std::vector<Note>& notes,
             const std::chrono::system_clock::time_point& dateOfCreation) noexcept :
             mLogLevel(logLevel),
             mClassname(classname),
             mMethod(method),
             mMessage(message),
+            mNotes(notes),
             mDateOfCreation(dateOfCreation) {
 
     }
@@ -30,6 +32,10 @@ namespace ee {
 
     const std::string &LogEntry::getMessage() const noexcept {
         return this->mMessage;
+    }
+
+    const std::vector<Note> &LogEntry::getNotes() const noexcept {
+        return this->mNotes;
     }
 
     const std::chrono::system_clock::time_point &LogEntry::getDateOfCreation() const noexcept {

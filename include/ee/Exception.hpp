@@ -8,6 +8,7 @@
 #include <list>
 #include <cstring>
 
+#include "Note.hpp"
 #include "Stacktrace.hpp"
 
 namespace ee {
@@ -15,78 +16,6 @@ namespace ee {
 #ifndef EASY_EXCEPTION_OUTPUT_FORMAT
 #define EASY_EXCEPTION_OUTPUT_FORMAT String
 #endif
-
-    /**
-     * @brief Info object that stores a key-value-pair.
-     */
-    struct Info {
-    public:
-        explicit Info(std::string name, std::string value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::move(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, uint8_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, int8_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, uint16_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, int16_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, uint32_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, int32_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, uint64_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, int64_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, float value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-        explicit Info(std::string name, double value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
-        explicit Info(std::string name, size_t value, std::string caller = "") noexcept
-                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-#endif
-
-        const std::string& getName() const noexcept {
-            return this->mName;
-        }
-
-        const std::string& getValue() const noexcept {
-            return this->mValue;
-        }
-
-        const std::string& getCaller() const noexcept {
-            return this->mCaller;
-        }
-
-    private:
-        /**
-         * @brief The name of the info.
-         */
-        std::string mName;
-
-        /**
-         * @brief The value of the info.
-         */
-        std::string mValue;
-
-        /**
-         * @brief The value of the caller
-         */
-        std::string mCaller;
-    };
 
     /**
      * @brief The base class for all exceptions, which is itself is based on std::exception.
@@ -103,7 +32,7 @@ namespace ee {
         explicit Exception(
                 std::string caller,
                 std::string message,
-                std::list<ee::Info> infos,
+                std::list<ee::Note> infos,
                 OutputFormat format = OutputFormat::EASY_EXCEPTION_OUTPUT_FORMAT
                         ) noexcept :
         mCaller(std::move(caller)),
@@ -145,7 +74,7 @@ namespace ee {
          * @param info The info object that provides the information that will be stored.
          * @return Reference to this.
          */
-        Exception&operator<<(const Info& info) noexcept {
+        Exception&operator<<(const Note& info) noexcept {
             try {
                 this->mInfos.emplace_back(info);
                 this->update();
@@ -279,7 +208,7 @@ namespace ee {
         /**
          * @brief Holds information stored by key-value pairs.
          */
-        std::list<Info> mInfos;
+        std::list<Note> mInfos;
 
         /**
          * @brief Holds the stacktrace.
@@ -296,6 +225,6 @@ namespace ee {
 /**
  * @brief Helps defining an custom exception.
  */
-#define DEFINE_EXCEPTION(name) class name : public ee::Exception {public:explicit name(const std::string &caller, const std::string& message, const std::list<ee::Info>& info):ee::Exception(caller,message,info){}}
+#define DEFINE_EXCEPTION(name) class name : public ee::Exception {public:explicit name(const std::string &caller, const std::string& message, const std::list<ee::Note>& info):ee::Exception(caller,message,info){}}
 
 #endif

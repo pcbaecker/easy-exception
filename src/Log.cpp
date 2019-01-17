@@ -13,7 +13,8 @@ namespace ee {
             LogLevel logLevel,
             const std::string &classname,
             const std::string &method,
-            const std::string &message) noexcept {
+            const std::string &message,
+            const std::vector<Note>& notes) noexcept {
         // Every thread stores its own pointer to the log list
         thread_local std::list<LogEntry>* pList = nullptr;
 
@@ -32,7 +33,7 @@ namespace ee {
         }
 
         // Create a LogEntry in the thread specific list
-        auto& logEntry = pList->emplace_back(logLevel, classname, method, message, std::chrono::system_clock::now());
+        auto& logEntry = pList->emplace_back(logLevel, classname, method, message, notes, std::chrono::system_clock::now());
 
         // Check if we have a callback function for this LogLevel
         if (CallbackMap.count(logLevel)) {

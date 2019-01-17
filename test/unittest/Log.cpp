@@ -8,13 +8,13 @@ TEST_CASE("ee:Log") {
     ee::Log::removeCallbacks();
 
     SECTION("const std::map<std::thread::id, std::list<LogEntry>>& getLogThreadMap() noexcept") {
-        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage");
+        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
         REQUIRE_FALSE(ee::Log::getLogThreadMap().empty());
     }
 
     SECTION("void reset() noexcept") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
-        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage");
+        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
         REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
         ee::Log::reset();
         REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
@@ -22,15 +22,17 @@ TEST_CASE("ee:Log") {
 
     SECTION("size_t getNumberOfLogEntries() noexcept") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
-        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage");
+        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
         REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
     }
 
-    SECTION("void log(LogLevel, const std::string&, const std::string&, const std::string&) noexcept") {
+    SECTION("void log(LogLevel, const std::string&, const std::string&, const std::string&,const std::vector<Note>&) noexcept") {
 
         SECTION("Simple logging of one entry in the main thread") {
             REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
-            ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage");
+            ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {
+                ee::Note("MyNote", "MyValue", __PRETTY_FUNCTION__)
+            });
             REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
             auto list = ee::Log::getLogThreadMap().at(std::this_thread::get_id());
             REQUIRE(list.size() == 1);
@@ -39,6 +41,9 @@ TEST_CASE("ee:Log") {
             REQUIRE(log.getClassname() == "MyClass");
             REQUIRE(log.getMethod() == "SomeMethod");
             REQUIRE(log.getMessage() == "MyMessage");
+            REQUIRE(log.getNotes().size() == 1);
+            REQUIRE(log.getNotes()[0].getName() == "MyNote");
+            REQUIRE(log.getNotes()[0].getValue() == "MyValue");
             REQUIRE(log.getDateOfCreation().time_since_epoch().count() > 0);
         }
 
@@ -54,7 +59,7 @@ TEST_CASE("ee:Log") {
                 threads.emplace_back([]() {
                     // Create 1.000.000 log entries
                     for (int j = 0; j < 1000000; j++) {
-                        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "Log entry " + std::to_string(j));
+                        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "Log entry " + std::to_string(j), {});
                     }
                 });
 
@@ -100,7 +105,7 @@ TEST_CASE("ee:Log") {
                 threads.emplace_back([](ee::LogLevel logLevel) {
                     // Create 1.000.000 log entries
                     for (int j = 0; j < 1000000; j++) {
-                        ee::Log::log(logLevel, "MyClass", "SomeMethod", "Log entry " + std::to_string(j));
+                        ee::Log::log(logLevel, "MyClass", "SomeMethod", "Log entry " + std::to_string(j), {});
                     }
 
                     // The first thread uses LogLevel 'Warning', the others use 'Info'

@@ -6,10 +6,10 @@ public:
         // Create the exception with caller method and message
         throw ee::Exception(__PRETTY_FUNCTION__, "My custom message", {
                 // Provide a list of custom infos
-                ee::Info("Username", "John Doe"),
-                ee::Info("UserId", 314),
-                ee::Info("Credit", 24.531),
-                ee::Info("std::string s", s, __PRETTY_FUNCTION__)
+                ee::Note("Username", "John Doe"),
+                ee::Note("UserId", 314),
+                ee::Note("Credit", 24.531),
+                ee::Note("std::string s", s, __PRETTY_FUNCTION__)
         }, ee::Exception::OutputFormat::Json);
     }
     int doFourth(const char* c) {
@@ -27,7 +27,7 @@ public:
         try {
             return doThird(f * 10.0f);
         } catch (ee::Exception& e) {
-            e << ee::Info("Provided float", f, __PRETTY_FUNCTION__);
+            e << ee::Note("Provided float", f, __PRETTY_FUNCTION__);
             throw;
         }
     }
