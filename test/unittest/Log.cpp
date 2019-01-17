@@ -26,13 +26,13 @@ TEST_CASE("ee:Log") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
     }
 
-    SECTION("void log(LogLevel, const std::string&, const std::string&, const std::string&,const std::vector<Note>&) noexcept") {
+    SECTION("void log(LogLevel, const std::string&, const std::string&, const std::string&,const std::vector<Note>&, const std::optional<std::shared_ptr<Stacktrace>>&) noexcept") {
 
         SECTION("Simple logging of one entry in the main thread") {
             REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
             ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {
                 ee::Note("MyNote", "MyValue", __PRETTY_FUNCTION__)
-            });
+            }, ee::Stacktrace::create());
             REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
             auto list = ee::Log::getLogThreadMap().at(std::this_thread::get_id());
             REQUIRE(list.size() == 1);
@@ -44,6 +44,8 @@ TEST_CASE("ee:Log") {
             REQUIRE(log.getNotes().size() == 1);
             REQUIRE(log.getNotes()[0].getName() == "MyNote");
             REQUIRE(log.getNotes()[0].getValue() == "MyValue");
+            REQUIRE(log.getStacktrace().has_value());
+            REQUIRE_FALSE(log.getStacktrace()->get()->getLines().empty());
             REQUIRE(log.getDateOfCreation().time_since_epoch().count() > 0);
         }
 

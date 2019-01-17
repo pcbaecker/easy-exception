@@ -8,6 +8,7 @@
 #include <functional>
 #include <atomic>
 
+#include "SuspendLogging.hpp"
 #include "LogEntry.hpp"
 
 namespace ee {
@@ -16,6 +17,7 @@ namespace ee {
      * @brief This class manages all logging activity. All other logging features will depend on this class.
      */
     class Log {
+        friend class SuspendLogging;
     public:
         /**
          * @brief The basic log method, that stores a log entry for the caller thread in the log-thread map.
@@ -25,13 +27,15 @@ namespace ee {
          * @param method The method name of the log entry.
          * @param message The message of the log entry.
          * @param notes A list of notes for the log entry.
+         * @param stacktrace The stacktrace for the log entry.
          */
         static void log(
                 LogLevel logLevel,
                 const std::string& classname,
                 const std::string& method,
                 const std::string& message,
-                const std::vector<Note>& notes) noexcept;
+                const std::vector<Note>& notes,
+                const std::optional<std::shared_ptr<Stacktrace>>& stacktrace = std::nullopt) noexcept;
 
         /**
          * @brief Returns a reference to the log-thread map. Using it can be critical due to the multi-threaded-nature of this framework.
@@ -98,7 +102,7 @@ namespace ee {
          *
          * Necessary for preventing the generation of log entries during the execution of a callback and possible reset().
          */
-        static std::atomic_bool SuspendLogging;
+        static std::atomic_uint16_t SuspendLoggingCounter;
     };
 
 }

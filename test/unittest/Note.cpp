@@ -11,24 +11,18 @@ TEST_CASE("ee::Note") {
     REQUIRE(noteUint16.getValue() == "1234");
     ee::Note noteInt16("int16_t", static_cast<int16_t>(-1234));
     REQUIRE(noteInt16.getValue() == "-1234");
-
-    explicit Note(std::string name, uint32_t value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-    explicit Note(std::string name, int32_t value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-    explicit Note(std::string name, uint64_t value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-    explicit Note(std::string name, int64_t value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-    explicit Note(std::string name, float value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
-
-    explicit Note(std::string name, double value, std::string caller = "") noexcept
-    : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+    ee::Note noteUint32("uint32_t", static_cast<uint32_t>(123456));
+    REQUIRE(noteUint32.getValue() == "123456");
+    ee::Note noteInt32("int32_t", static_cast<int32_t>(-123456));
+    REQUIRE(noteInt32.getValue() == "-123456");
+    ee::Note noteUint64("uint64_t", static_cast<uint64_t>(1234567));
+    REQUIRE(noteUint64.getValue() == "1234567");
+    ee::Note noteInt64("int64_t", static_cast<int64_t>(-1234567));
+    REQUIRE(noteInt64.getValue() == "-1234567");
+    ee::Note noteFloat("float", static_cast<float>(3.14f));
+    REQUIRE(noteFloat.getValue().find("3.14") != std::string::npos);
+    ee::Note noteDouble("double", static_cast<double>(123.123));
+    REQUIRE(noteDouble.getValue().find("123.123") != std::string::npos);
 
     ee::Note note("MyNote", "MyValue", "MyCaller");
 

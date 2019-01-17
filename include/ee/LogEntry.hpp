@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "Note.hpp"
+#include "Stacktrace.hpp"
 
 namespace ee {
 
@@ -24,6 +25,7 @@ namespace ee {
          * @param method The methodname of the caller.
          * @param message The message describing the incident.
          * @param notes A list of notes containing variables and other usful information.
+         * @param stacktrace Can hold a stacktrace.
          * @param dateOfCreation The date of occurrence.
          */
         LogEntry(
@@ -32,6 +34,7 @@ namespace ee {
                 const std::string& method,
                 const std::string& message,
                 const std::vector<Note>& notes,
+                const std::optional<std::shared_ptr<Stacktrace>>& stacktrace,
                 const std::chrono::system_clock::time_point& dateOfCreation) noexcept;
 
         /**
@@ -70,6 +73,13 @@ namespace ee {
         const std::vector<Note>& getNotes() const noexcept;
 
         /**
+         * @brief Returns an optional that can contain a stacktrace.
+         *
+         * @return Optional that can contain a stacktrace.
+         */
+        const std::optional<std::shared_ptr<Stacktrace>>& getStacktrace() const noexcept;
+
+        /**
          * @brief Returns the date of occurrence.
          *
          * @return Date of occurrence.
@@ -101,6 +111,11 @@ namespace ee {
          * @brief Holds a list of notes containing useful information.
          */
         std::vector<Note> mNotes;
+
+        /**
+         * @brief Holds an optional that can hold a stacktrace.
+         */
+        std::optional<std::shared_ptr<Stacktrace>> mStacktrace;
 
         /**
          * @brief Holds the date of occurrence.

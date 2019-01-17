@@ -5,7 +5,7 @@
 namespace ee {
 
     std::recursive_mutex Log::Mutex;
-    std::atomic_bool Log::SuspendLogging = false;
+    std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
     std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
     std::map<LogLevel,std::function<void(const LogEntry&)>> Log::CallbackMap;
 
@@ -14,7 +14,8 @@ namespace ee {
             const std::string &classname,
             const std::string &method,
             const std::string &message,
-            const std::vector<Note>& notes) noexcept {
+            const std::vector<Note>& notes,
+            const std::optional<std::shared_ptr<Stacktrace>>& stacktrace) noexcept {
         // Every thread stores its own pointer to the log list
         thread_local std::list<LogEntry>* pList = nullptr;
 
@@ -28,12 +29,12 @@ namespace ee {
         }
 
         // For a short period of time we may suspend the creation of logs
-        if (SuspendLogging) {
+        if (SuspendLoggingCounter > 0) {
             return;
         }
 
         // Create a LogEntry in the thread specific list
-        auto& logEntry = pList->emplace_back(logLevel, classname, method, message, notes, std::chrono::system_clock::now());
+        auto& logEntry = pList->emplace_back(logLevel, classname, method, message, notes, stacktrace, std::chrono::system_clock::now());
 
         // Check if we have a callback function for this LogLevel
         if (CallbackMap.count(logLevel)) {
@@ -62,8 +63,8 @@ namespace ee {
     }
 
     void Log::reset() noexcept {
-        // Suspend logging for the time of the reset
-        SuspendLogging = true;
+        // Suspend logging for this scope
+        SuspendLogging suspendLogging;
 
         // Modifying the parent map, that means we have to use concurrent logic
         std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
@@ -74,9 +75,6 @@ namespace ee {
             // and we would make them invalid. Instead we just clear each list and the pointers remain valid.
             thread.second.clear();
         }
-
-        // Reset is done, we can resume creating logs
-        SuspendLogging = false;
     }
 
     void Log::registerCallback(LogLevel logLevel, std::function<void(const LogEntry &)> callback) noexcept {

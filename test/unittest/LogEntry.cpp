@@ -8,7 +8,7 @@ TEST_CASE("ee::LogEntry") {
         ee::Note("MyNote", "MyValue", __PRETTY_FUNCTION__),
         ee::Note("MyAge", 21, __PRETTY_FUNCTION__),
         ee::Note("MyWeight", 88.3f, __PRETTY_FUNCTION__)
-        }, dateOfCreation);
+        }, ee::Stacktrace::create(), dateOfCreation);
 
     SECTION("LogLevel getLogLevel() const noexcept") {
         REQUIRE(logEntry.getLogLevel() == ee::LogLevel::Info);
@@ -34,6 +34,11 @@ TEST_CASE("ee::LogEntry") {
         REQUIRE(logEntry.getNotes()[1].getValue() == "21");
         REQUIRE(logEntry.getNotes()[2].getName() == "MyWeight");
         REQUIRE(logEntry.getNotes()[2].getValue().find("88.3") != std::string::npos);
+    }
+
+    SECTION("const std::optional<std::shared_ptr<Stacktrace>>& getStacktrace() const noexcept") {
+        REQUIRE(logEntry.getStacktrace().has_value());
+        REQUIRE_FALSE(logEntry.getStacktrace()->get()->getLines().empty());
     }
 
     SECTION("const std::chrono::system_clock::time_point& getDateOfCreation() const noexcept") {

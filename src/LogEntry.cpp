@@ -8,12 +8,14 @@ namespace ee {
             const std::string &method,
             const std::string &message,
             const std::vector<Note>& notes,
+            const std::optional<std::shared_ptr<Stacktrace>>& stacktrace,
             const std::chrono::system_clock::time_point& dateOfCreation) noexcept :
             mLogLevel(logLevel),
             mClassname(classname),
             mMethod(method),
             mMessage(message),
             mNotes(notes),
+            mStacktrace(stacktrace),
             mDateOfCreation(dateOfCreation) {
 
     }
@@ -36,6 +38,10 @@ namespace ee {
 
     const std::vector<Note> &LogEntry::getNotes() const noexcept {
         return this->mNotes;
+    }
+
+    const std::optional<std::shared_ptr<Stacktrace>> &LogEntry::getStacktrace() const noexcept {
+        return this->mStacktrace;
     }
 
     const std::chrono::system_clock::time_point &LogEntry::getDateOfCreation() const noexcept {
