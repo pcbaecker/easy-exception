@@ -1,0 +1,12 @@
+language: cpp
+
+compiler:
+- gcc
+- clang
+
+before_script:
+- mkdir cmake-build-test
+- cd cmake-build-test
+- cmake ..
+
+script: make && test/unittest/EasyExceptionUnitTest
