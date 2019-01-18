@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.0)
 project(EasyException)
 option(USE_EXAMPLES "Use examples" ON)
 option(USE_TESTS "Use tests" ON)
