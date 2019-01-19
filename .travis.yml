@@ -1,22 +1,27 @@
 language: cpp
 
-compiler:
-  - gcc
-  - clang
-
-os: linux
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-trusty-5.0
-    packages:
-    - g++-7
-    - clang-5.0
+matrix:
+  include:
+    # gcc-7
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: COMPILER=g++-7
+    # clang 5.0
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+      env: COMPILER=clang++5.0
 
 before_script:
-- export CC=clang-5.0
-- export CXX=clang++-5.0
 - mkdir cmake-build-test
 - cd cmake-build-test
 - cmake ..
