@@ -4,7 +4,9 @@ matrix:
   include:
 
     # gcc-7
-    - addons:
+    - os: linux
+      compiler: gcc
+      addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
@@ -14,7 +16,9 @@ matrix:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
     # clang 5.0
-    - addons:
+    - os: linux
+      compiler: clang
+      addons:
         apt:
           sources:
             - llvm-toolchain-trusty-5.0
@@ -23,10 +27,13 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
+before_install:
+  - eval "${MATRIX_EVAL}"
+
 before_script:
-- mkdir cmake-build-test
-- cd cmake-build-test
-- cmake ..
+  - mkdir cmake-build-test
+  - cd cmake-build-test
+  - cmake ..
 
 script:
   - make
