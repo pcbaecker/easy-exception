@@ -1,7 +1,7 @@
 language: cpp
 
 compiler:
-- gcc
+  - gcc
 
 os: linux
 addons:
@@ -12,11 +12,11 @@ addons:
     - g++-7
 
 before_script:
+- export CC=gcc-7
+- export CXX=g++-7
 - mkdir cmake-build-test
 - cd cmake-build-test
 - cmake ..
 
 script:
-- export CC=gcc-7
-- export CXX=g++-7
 - make && test/unittest/EasyExceptionUnitTest
