@@ -93,6 +93,12 @@ namespace ee {
 
     private:
         /**
+         * @brief Updates the cache.
+         */
+        void update() noexcept;
+
+    private:
+        /**
          * @brief Defines the output format of this exception.
          */
         OutputFormat mFormat;
@@ -121,6 +127,11 @@ namespace ee {
          * @brief The date and time of the exception.
          */
         std::chrono::time_point<std::chrono::system_clock> mTimepoint;
+
+        /**
+         * @brief Caches the message for what().
+         */
+        std::string mCache;
     };
 }
 

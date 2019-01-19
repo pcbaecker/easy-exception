@@ -49,9 +49,9 @@ int main() {
         // Receive the exception here and print the generated output to CERR
         std::cerr << e.what() << std::endl;
 
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
     } catch (...) {
         std::cerr << "Unknown exception" << std::endl;
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
     }
 }

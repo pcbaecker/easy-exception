@@ -13,21 +13,23 @@ namespace ee {
             mTimepoint(std::chrono::system_clock::now()),
             mFormat(format),
             mStacktrace(Stacktrace::create()) {
-
+        this->update();
     }
 
     Exception &Exception::operator<<(const Note &info) noexcept {
         try {
             this->mInfos.emplace_back(info);
+            this->update();
         } catch (...) {
             std::cerr << __PRETTY_FUNCTION__ << ": Could not store info" << std::endl;
         }
         return *this;
     }
 
-    const char *Exception::what() const noexcept {
+    void Exception::update() noexcept {
         try {
-            std::string str;
+            this->mCache.clear();
+            std::string& str = this->mCache;
 
             // Format datetime to string
             char datetime[128];
@@ -60,7 +62,7 @@ namespace ee {
                         }
                     }
                     if (this->mStacktrace.has_value()
-                    && !this->mStacktrace->get()->getLines().empty()) {
+                        && !this->mStacktrace->get()->getLines().empty()) {
                         str += "Stacktrace:\n";
                         str += this->mStacktrace->get()->asString();
                     }
@@ -93,7 +95,7 @@ namespace ee {
                         str += "]";
                     }
                     if (this->mStacktrace.has_value()
-                    && !this->mStacktrace->get()->getLines().empty()) {
+                        && !this->mStacktrace->get()->getLines().empty()) {
                         str += ",\n\"stacktrace\" : [\n";
                         uint16_t i = 0;
                         for (const auto& line : this->mStacktrace->get()->getLines()) {
@@ -108,12 +110,14 @@ namespace ee {
                     str += "\n}";
                 }
             }
-
-            return str.c_str();
         } catch (...) {
             std::cerr << __PRETTY_FUNCTION__ << ": Could not build message" << std::endl;
-            return "Could not build message";
+            this->mCache = "Could not build message";
         }
+    }
+
+    const char *Exception::what() const noexcept {
+        return this->mCache.c_str();
     }
 
     const std::string &Exception::getMessage() const noexcept {
