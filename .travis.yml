@@ -3,8 +3,7 @@ language: cpp
 matrix:
   include:
     # gcc-7
-    - compiler: gcc
-      addons:
+    - addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
@@ -14,8 +13,7 @@ matrix:
         - CC=gcc-7
         - CXX=g++-7
     # clang 5.0
-    - compiler: clang
-      addons:
+    - addons:
         apt:
           sources:
             - llvm-toolchain-trusty-5.0
