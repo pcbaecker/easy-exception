@@ -10,7 +10,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
-      env: COMPILER=g++-7
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
     # clang 5.0
     - compiler: clang
       addons:
@@ -19,7 +21,9 @@ matrix:
             - llvm-toolchain-trusty-5.0
           packages:
             - clang-5.0
-      env: COMPILER=clang++5.0
+      env:
+        - CC=clang-5.0
+        - CXX=clang++-5.0
 
 before_script:
 - mkdir cmake-build-test
