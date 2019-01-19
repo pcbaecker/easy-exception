@@ -19,4 +19,10 @@ before_script:
 - cmake ..
 
 script:
-- make && test/unittest/EasyExceptionUnitTest
+  - make
+  - test/unittest/EasyExceptionUnitTest
+  - ./CustomException
+  - ./JsonException
+  - ./LoggerInheritance
+  - ./SimpleException
+  - ./SimpleStacktrace
