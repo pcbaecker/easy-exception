@@ -2,21 +2,21 @@ language: cpp
 
 compiler:
 - gcc
-- clang
 
-before_install:
-# C++17
-- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-- sudo apt-get update -qq
-
-install:
-# C++17
-- sudo apt-get install -qq g++-6
-- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+os: linux
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-7
 
 before_script:
 - mkdir cmake-build-test
 - cd cmake-build-test
 - cmake ..
 
-script: make && test/unittest/EasyExceptionUnitTest
+script:
+- export CC=gcc-7
+- export CXX=g++-7
+- make && test/unittest/EasyExceptionUnitTest
