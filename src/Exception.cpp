@@ -6,7 +6,7 @@ namespace ee {
             std::string caller,
             std::string message,
             std::vector<ee::Note> infos,
-            Exception::OutputFormat format) noexcept :
+            OutputFormat format) noexcept :
             mCaller(std::move(caller)),
             mMessage(std::move(message)),
             mInfos(std::move(infos)),

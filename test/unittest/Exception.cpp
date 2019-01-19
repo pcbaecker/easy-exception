@@ -19,13 +19,13 @@ TEST_CASE("ee::Exception") {
     SECTION("const char *what() const noexcept override") {
         ee::Exception exceptionJson("MyCaller", "MyMessage", {
                 ee::Note("MyNote", "MyValue", "CallerOfThisNote")
-        }, ee::Exception::OutputFormat::Json);
+        }, ee::OutputFormat::Json);
         std::string json = exceptionJson.what();
         REQUIRE_FALSE(json.empty());
 
         ee::Exception exceptionString("MyCaller", "MyMessage", {
                 ee::Note("MyNote", "MyValue", "CallerOfThisNote")
-        }, ee::Exception::OutputFormat::String);
+        }, ee::OutputFormat::String);
         std::string string = exceptionString.what();
         REQUIRE_FALSE(string.empty());
     }

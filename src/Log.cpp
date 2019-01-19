@@ -88,4 +88,8 @@ namespace ee {
     void Log::removeCallbacks() noexcept {
         CallbackMap.clear();
     }
+
+    bool Log::writeToFile(const std::string &filename, OutputFormat format) noexcept {
+        return true;
+    }
 }

@@ -18,15 +18,15 @@ namespace ee {
 #endif
 
     /**
+     * @brief Possible output formats.
+     */
+    enum OutputFormat {String = 0, Json = 1};
+
+    /**
      * @brief The base class for all exceptions, which is itself is based on std::exception.
      */
     class Exception : public std::exception {
     public:
-        /**
-         * @brief Possible output formats for the exception.
-         */
-        enum OutputFormat {String, Json};
-
         /**
          * @brief Constructor with caller and message.
          *

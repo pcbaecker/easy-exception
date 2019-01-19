@@ -8,6 +8,7 @@
 #include <functional>
 #include <atomic>
 
+#include "Exception.hpp"
 #include "SuspendLogging.hpp"
 #include "LogEntry.hpp"
 
@@ -79,6 +80,16 @@ namespace ee {
          * @brief Removes all registered callbacks.
          */
         static void removeCallbacks() noexcept;
+
+        /**
+         * @brief Writes all logs into a file with the given name.
+         *
+         * The file will be created if it not exists and override all previously created content.
+         * @param filename The name of the file.
+         * @param format The output format to use when writing into the file.
+         * @return True if writing was successfully.
+         */
+        static bool writeToFile(const std::string& filename, OutputFormat format = EASY_EXCEPTION_OUTPUT_FORMAT) noexcept;
 
     private:
         /**

@@ -146,4 +146,19 @@ TEST_CASE("ee:Log") {
         REQUIRE(ee::Log::getCallbackMap().empty());
     }
 
+    SECTION("bool writeToFile(const std::string&, OutputFormat) noexcept") {
+        // Create some logs
+        for (int i = 0; i < 10; i++) {
+            ee::Log::log(ee::LogLevel::Info, "MyClass", "MyMethod", "MyMessage",
+                    {ee::Note("Index", i, __PRETTY_FUNCTION__)},
+                    i % 2 == 0 ? ee::Stacktrace::create() : std::nullopt);
+        }
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 10);
+
+        // Create the file
+        REQUIRE(ee::Log::writeToFile("myLog.log", ee::OutputFormat::String));
+
+
+    }
+
 }
