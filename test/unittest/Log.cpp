@@ -1,11 +1,18 @@
 #include "catch.hpp"
 #include <ee/Log.hpp>
-#include <iostream>
+#include <unistd.h>
+#include <sstream>
+
+bool fileExists(const std::string& name) {
+    return ( access( name.c_str(), F_OK ) != -1 );
+}
+
 TEST_CASE("ee:Log") {
 
     // Reset the log before every test
     ee::Log::reset();
     ee::Log::removeCallbacks();
+    ee::Log::removeOutstreams();
 
     SECTION("const std::map<std::thread::id, std::list<LogEntry>>& getLogThreadMap() noexcept") {
         ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
@@ -122,7 +129,32 @@ TEST_CASE("ee:Log") {
             // The counter should have registered 1.000.000 warnings
             REQUIRE(counter == 1000000);
         }
+    }
 
+    SECTION("void log(LogLevel, const Exception&) noexcept") {
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
+        ee::Exception exception("MyCaller", "MyMessage", {
+            ee::Note("MyFirstNote", "TheFirstValue", "TheFirstNoteCaller"),
+            ee::Note("MySecondNote", "TheSecondValue", "TheSecondNoteCaller")
+        });
+
+        ee::Log::log(ee::LogLevel::Warning, exception);
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+        REQUIRE(ee::Log::getLogThreadMap().count(std::this_thread::get_id()));
+        auto logEntries = ee::Log::getLogThreadMap().at(std::this_thread::get_id());
+        REQUIRE(logEntries.size() == 1);
+        auto& logEntry = *logEntries.cbegin();
+        REQUIRE(logEntry.getClassname() == "ee::Exception");
+        REQUIRE(logEntry.getMethod() == "MyCaller");
+        REQUIRE(logEntry.getMessage() == "MyMessage");
+        REQUIRE(logEntry.getNotes().size() == 2);
+        REQUIRE(logEntry.getNotes()[0].getName() == "MyFirstNote");
+        REQUIRE(logEntry.getNotes()[0].getValue() == "TheFirstValue");
+        REQUIRE(logEntry.getNotes()[0].getCaller() == "TheFirstNoteCaller");
+        REQUIRE(logEntry.getNotes()[1].getName() == "MySecondNote");
+        REQUIRE(logEntry.getNotes()[1].getValue() == "TheSecondValue");
+        REQUIRE(logEntry.getNotes()[1].getCaller() == "TheSecondNoteCaller");
+        REQUIRE(logEntry.getStacktrace().has_value());
     }
 
     SECTION("void registerCallback(LogLevel logLevel, std::function<void(const LogEntry&)>) noexcept") {
@@ -156,9 +188,51 @@ TEST_CASE("ee:Log") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 10);
 
         // Create the file
+        REQUIRE_FALSE(fileExists("myLog.log"));
         REQUIRE(ee::Log::writeToFile("myLog.log", ee::OutputFormat::String));
+        REQUIRE(fileExists("myLog.log"));
+        REQUIRE(std::remove("myLog.log") == 0);
+    }
 
+    SECTION("void registerOutstream(LogLevel, std::ostream&) noexcept") {
+        // Create a out stream buffer that simulates e.g. std::cout
+        std::stringbuf stringBuffer;
+        std::ostream stream(&stringBuffer);
 
+        // Register a stream on the warning level
+        ee::Log::registerOutstream(ee::LogLevel::Warning, stream);
+        REQUIRE(stringBuffer.str().length() == 0);
+
+        // Log an info
+        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
+        REQUIRE(stringBuffer.str().length() == 0);
+
+        // Log a warning
+        ee::Log::log(ee::LogLevel::Warning, "MyClass", "SomeMethod", "MyMessage", {});
+        REQUIRE(stringBuffer.str().length() > 0);
+
+        // We have to remove the outstream because it will be destroyed here on end of scope
+        ee::Log::removeOutstreams();
+    }
+
+    SECTION("void removeOutstreams() noexcept") {
+        // Create a out stream buffer that simulates e.g. std::cout
+        std::stringbuf stringBuffer;
+        std::ostream stream(&stringBuffer);
+
+        // Register a stream on the warning level and make sure that it logs
+        ee::Log::registerOutstream(ee::LogLevel::Warning, stream);
+        ee::Log::log(ee::LogLevel::Warning, "MyClass", "SomeMethod", "MyMessage", {});
+        REQUIRE(stringBuffer.str().length() > 0);
+
+        // Clear the stringbuffer
+        stringBuffer.str("");
+        REQUIRE(stringBuffer.str().length() == 0);
+
+        // Remove all streams
+        ee::Log::removeOutstreams();
+        ee::Log::log(ee::LogLevel::Warning, "MyClass", "SomeMethod", "MyMessage", {});
+        REQUIRE(stringBuffer.str().length() == 0);
     }
 
 }

@@ -1,6 +1,5 @@
 #include <ee/Log.hpp>
-#include <iostream>
-
+#include <fstream>
 
 namespace ee {
 
@@ -8,6 +7,7 @@ namespace ee {
     std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
     std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
     std::map<LogLevel,std::function<void(const LogEntry&)>> Log::CallbackMap;
+    std::map<LogLevel, std::ostream*> Log::OutStreamMap;
 
     void Log::log(
             LogLevel logLevel,
@@ -36,11 +36,27 @@ namespace ee {
         // Create a LogEntry in the thread specific list
         auto& logEntry = pList->emplace_back(logLevel, classname, method, message, notes, stacktrace, std::chrono::system_clock::now());
 
+        // Check if we should display a copy of the logEntry in an outstream (e.g.: std::cout)
+        if (OutStreamMap.count(logLevel)) {
+            (*OutStreamMap.at(logLevel)) << "yo" << std::endl;
+        }
+
         // Check if we have a callback function for this LogLevel
         if (CallbackMap.count(logLevel)) {
             // Execute the callback
             CallbackMap.at(logLevel)(logEntry);
         }
+    }
+
+    void Log::log(LogLevel logLevel, const Exception &exception) noexcept {
+        log(
+                logLevel,
+                "ee::Exception",
+                exception.getCaller(),
+                exception.getMessage(),
+                exception.getNotes(),
+                exception.getStacktrace()
+                );
     }
 
     const std::map<std::thread::id, std::list<LogEntry>> &Log::getLogThreadMap() noexcept {
@@ -90,6 +106,69 @@ namespace ee {
     }
 
     bool Log::writeToFile(const std::string &filename, OutputFormat format) noexcept {
+        // Suspend logging for the scope of this method
+        SuspendLogging suspendLogging;
+
+        // Delete the file if it already exists, we done want to append the content
+        std::remove(filename.c_str());
+
+        // Try to open file
+        std::ofstream file;
+        file.open(filename);
+        if (!file.is_open()) {
+            // Could not open file for writing
+            return false;
+        }
+
+        // Iterate through all threads
+        for (auto& thread : LogThreadMap) {
+            // Check if this thread has at least one log entry
+            if (!thread.second.empty()) {
+                // Write the headline for this thread
+                for (int i = 0; i < 32; i++) {file << '#';}
+                file << "### " << thread.first;
+                for (int i = 0; i < 32; i++) {file << '#';}
+                file << "\n";
+
+                // Iterate through all log entries for this thread
+                for (auto& logEntry : thread.second) {
+                    file << toString(logEntry.getLogLevel()) << " -> ";
+                    auto dateOfCreation = std::chrono::system_clock::to_time_t(logEntry.getDateOfCreation());
+                    std::string dateOfCreationStr = std::ctime(&dateOfCreation);
+                    file << "DateOfCreation={ " << dateOfCreationStr.substr(0, dateOfCreationStr.length()-1)  << " } ";
+                    if (!logEntry.getClassname().empty()) {
+                        file << "Classname={ " << logEntry.getClassname() << "} ";
+                    }
+                    if (!logEntry.getMethod().empty()) {
+                        file << "Method={ " << logEntry.getMethod() << " } ";
+                    }
+                    if (!logEntry.getMessage().empty()) {
+                        file << "Message={ " << logEntry.getMessage() << " } ";
+                    }
+                    file << "\n";
+                    if (!logEntry.getNotes().empty()) {
+                        for (auto& note : logEntry.getNotes()) {
+                            file << "\t" << note.getName() << ": " << note.getValue();
+                            if (!note.getCaller().empty()) {
+                                file << " { " << note.getCaller() << " }";
+                            }
+                            file << "\n";
+                        }
+                    }
+                    file << "\n\n";
+                }
+            }
+        }
+
+        file.close();
         return true;
+    }
+
+    void Log::registerOutstream(LogLevel logLevel, std::ostream &outstream) noexcept {
+        OutStreamMap[logLevel] = &outstream;
+    }
+
+    void Log::removeOutstreams() noexcept {
+        OutStreamMap.clear();
     }
 }

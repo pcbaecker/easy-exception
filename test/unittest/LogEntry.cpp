@@ -1,10 +1,19 @@
 #include "catch.hpp"
 #include <ee/LogEntry.hpp>
+#include <sstream>
+
+TEST_CASE("std::string ee::toString(LogLevel logLevel) noexcept") {
+    REQUIRE(ee::toString(ee::LogLevel::Trace) == "TRACE");
+    REQUIRE(ee::toString(ee::LogLevel::Info) == "INFO");
+    REQUIRE(ee::toString(ee::LogLevel::Warning) == "WARNING");
+    REQUIRE(ee::toString(ee::LogLevel::Error) == "ERROR");
+    REQUIRE(ee::toString(ee::LogLevel::Fatal) == "FATAL");
+}
 
 TEST_CASE("ee::LogEntry") {
 
     auto dateOfCreation = std::chrono::system_clock::now();
-    ee::LogEntry logEntry(ee::LogLevel::Info, "MyClass", "MyMethod", "MyMessage", {
+    const ee::LogEntry logEntry(ee::LogLevel::Info, "MyClass", "MyMethod", "MyMessage", {
         ee::Note("MyNote", "MyValue", __PRETTY_FUNCTION__),
         ee::Note("MyAge", 21, __PRETTY_FUNCTION__),
         ee::Note("MyWeight", 88.3f, __PRETTY_FUNCTION__)
@@ -43,6 +52,17 @@ TEST_CASE("ee::LogEntry") {
 
     SECTION("const std::chrono::system_clock::time_point& getDateOfCreation() const noexcept") {
         REQUIRE(logEntry.getDateOfCreation() == dateOfCreation);
+    }
+
+    SECTION("void write(std::ostream&) const noexcept") {
+        // Create a out stream buffer that simulates e.g. std::cout
+        std::stringbuf stringBuffer;
+        std::ostream stream(&stringBuffer);
+
+        // Let the logentry write to the stream
+        REQUIRE(stringBuffer.str().length() == 0);
+        logEntry.write(stream);
+        REQUIRE(stringBuffer.str().length() > 0);
     }
 
 }

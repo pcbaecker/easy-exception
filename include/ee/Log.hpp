@@ -39,6 +39,14 @@ namespace ee {
                 const std::optional<std::shared_ptr<Stacktrace>>& stacktrace = std::nullopt) noexcept;
 
         /**
+         * @brief Converts the given exception into an LogEntry and stores that into the log.
+         *
+         * @param logLevel The log level to use.
+         * @param exception The exception to log.
+         */
+        static void log(LogLevel logLevel, const Exception& exception) noexcept;
+
+        /**
          * @brief Returns a reference to the log-thread map. Using it can be critical due to the multi-threaded-nature of this framework.
          *
          * @return Reference to the log-thread map.
@@ -91,6 +99,20 @@ namespace ee {
          */
         static bool writeToFile(const std::string& filename, OutputFormat format = EASY_EXCEPTION_OUTPUT_FORMAT) noexcept;
 
+        /**
+         * @brief Registers the given outstream with a specific log level.
+         *
+         * All future logs in this loglevel will be printed into that outstream.
+         * @param logLevel The log level where the printing should be executed.
+         * @param outstream The out stream where the output should go into.
+         */
+        static void registerOutstream(LogLevel logLevel, std::ostream& outstream) noexcept;
+
+        /**
+         * @brief Removes all registered out streams.
+         */
+        static void removeOutstreams() noexcept;
+
     private:
         /**
          * @brief The mutex that manages the log-thread map. It must be locked every time the LogThreadMap
@@ -114,6 +136,11 @@ namespace ee {
          * Necessary for preventing the generation of log entries during the execution of a callback and possible reset().
          */
         static std::atomic_uint16_t SuspendLoggingCounter;
+
+        /**
+         * @brief This map contains the output streams that should be used for the specific LogLevels.
+         */
+        static std::map<LogLevel, std::ostream*> OutStreamMap;
     };
 
 }

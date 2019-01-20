@@ -1,5 +1,7 @@
 # Easy Exception
 
+[![Build Status](https://travis-ci.org/pcbaecker/easy-exception.svg?branch=master)](https://travis-ci.org/pcbaecker/easy-exception)
+
 This framework is intended be easy to use and provide exceptions with stacktrace and custom debug information.
 
 ### How to use

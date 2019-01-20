@@ -1,6 +1,24 @@
 #include <ee/LogEntry.hpp>
+#include <ostream>
 
 namespace ee {
+
+    std::string toString(LogLevel logLevel) noexcept {
+        switch (logLevel) {
+            default:
+                return "Unknown";
+            case Trace:
+                return "TRACE";
+            case Info:
+                return "INFO";
+            case Warning:
+                return "WARNING";
+            case Error:
+                return "ERROR";
+            case Fatal:
+                return "FATAL";
+        }
+    }
 
     LogEntry::LogEntry(
             LogLevel logLevel,
@@ -46,5 +64,39 @@ namespace ee {
 
     const std::chrono::system_clock::time_point &LogEntry::getDateOfCreation() const noexcept {
         return this->mDateOfCreation;
+    }
+
+    void LogEntry::write(std::ostream &stream) const noexcept {
+        // Prepare dateOfCreation
+        auto dateOfCreation = std::chrono::system_clock::to_time_t(this->mDateOfCreation);
+        std::string dateOfCreationStr = std::ctime(&dateOfCreation);
+
+        // Write first line
+        stream << toString(this->mLogLevel) << " [" << dateOfCreationStr.substr(0, dateOfCreationStr.length()-1) << "] ";
+        if (!this->mMessage.empty()) {
+            stream << this->mMessage;
+        }
+        if (!this->mClassname.empty()) {
+            stream << " ::" << this->mClassname << "::";
+        }
+        if (!this->mMethod.empty()) {
+            stream << " " << this->mMethod;
+        }
+        stream << std::endl;
+
+        // Write the next lines of notes
+        for (auto& note : this->mNotes) {
+            stream << "\t" << note.getName() << ": " << note.getValue();
+            if (!note.getCaller().empty()) {
+                stream << " --> " << note.getCaller();
+            }
+            stream << std::endl;
+        }
+
+        // Write the stacktrace
+        if (this->mStacktrace.has_value()) {
+            stream << "Stacktrace:" << std::endl;
+            stream << this->mStacktrace->get()->asString();
+        }
     }
 }

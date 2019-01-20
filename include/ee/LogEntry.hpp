@@ -12,6 +12,8 @@ namespace ee {
 
     enum LogLevel {Trace = 0, Info = 1, Warning = 2, Error = 3, Fatal = 4};
 
+    std::string toString(LogLevel logLevel) noexcept;
+
     /**
      * @brief Holds all information regarding a single LogEntry.
      */
@@ -85,6 +87,13 @@ namespace ee {
          * @return Date of occurrence.
          */
         const std::chrono::system_clock::time_point& getDateOfCreation() const noexcept;
+
+        /**
+         * @brief Writes the LogEntry to an outstream .
+         *
+         * @param stream The stream to write to.
+         */
+        void write(std::ostream& stream) const noexcept;
 
     private:
         /**
