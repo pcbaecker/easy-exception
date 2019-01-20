@@ -5,6 +5,7 @@ matrix:
 
     # gcc-7
     - os: linux
+      dist: xenial
       compiler: gcc
       addons:
         apt:
@@ -15,17 +16,11 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
-    # clang 5.0
+    # clang 7.0
     - os: linux
       compiler: clang
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
       env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+        - MATRIX_EVAL="CC=clang-7.0 && CXX=clang++-7.0"
 
 before_install:
   - eval "${MATRIX_EVAL}"

@@ -41,15 +41,17 @@ int main() {
         SampleOne sampleOne;
         sampleOne.doFirst(10, 12);
 
-        return EXIT_SUCCESS;
+        // Program should NOT exit here
+        return EXIT_FAILURE;
     } catch (std::exception& e) {
 
         // Receive the exception here and print the generated output to CERR
         std::cerr << e.what() << std::endl;
 
+        // Program should exit here
         return EXIT_SUCCESS;
     } catch (...) {
         std::cerr << "Unknown exception" << std::endl;
-        return EXIT_SUCCESS;
+        return EXIT_FAILURE;
     }
 }
