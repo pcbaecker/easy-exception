@@ -27,7 +27,7 @@ matrix:
           packages:
           - libstdc++-7-dev
       env:
-        - MATRIX_EVAL="CC=clang-7.0 && CXX=clang++-7.0"
+        - MATRIX_EVAL=""
 
 before_install:
   - eval "${MATRIX_EVAL}"
