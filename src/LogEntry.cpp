@@ -80,7 +80,7 @@ namespace ee {
             stream << " ::" << this->mClassname << "::";
         }
         if (!this->mMethod.empty()) {
-            stream << " " << this->mMethod;
+            stream << " --> " << this->mMethod;
         }
         stream << std::endl;
 

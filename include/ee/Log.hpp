@@ -21,6 +21,11 @@ namespace ee {
         friend class SuspendLogging;
     public:
         /**
+         * @brief This method applies the default configuration of this framework.
+         */
+        static void applyDefaultConfiguration(const std::string& logFolder = "") noexcept;
+
+        /**
          * @brief The basic log method, that stores a log entry for the caller thread in the log-thread map.
          *
          * @param logLevel The log level of the log entry.

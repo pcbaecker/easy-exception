@@ -235,4 +235,8 @@ TEST_CASE("ee:Log") {
         REQUIRE(stringBuffer.str().length() == 0);
     }
 
+    SECTION("void applyDefaultConfiguration() noexcept") {
+        ee::Log::applyDefaultConfiguration();
+    }
+
 }
