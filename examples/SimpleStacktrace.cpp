@@ -1,9 +1,13 @@
 #include <iostream>
-#include <Stacktrace.hpp>
+#include <ee/Stacktrace.hpp>
 
 std::string goo(int a) {
-    ee::Stacktrace<16> stacktrace;
-    return stacktrace.asString();
+    auto stacktrace = ee::Stacktrace::create(a);
+    if (stacktrace.has_value()) {
+        return stacktrace->get()->asString();
+    } else {
+        return "";
+    }
 }
 
 std::string bar(int a) {

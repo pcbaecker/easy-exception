@@ -1,28 +1,42 @@
 cmake_minimum_required(VERSION 3.12)
-project(cpp_exception_framework)
+project(EasyException)
+option(USE_EXAMPLES "Use examples" ON)
+option(USE_TESTS "Use tests" ON)
 
 set(CMAKE_CXX_STANDARD 17)
-
 set(CMAKE_CXX_FLAGS -rdynamic)
-
 include_directories(include)
+file(GLOB_RECURSE HEADER_FILES include/*.hpp)
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+add_library(EasyException STATIC ${HEADER_FILES} ${SOURCE_FILES})
+target_link_libraries(EasyException dl)
 
-### Simple Stacktrace
-add_executable(SimpleStacktrace examples/SimpleStacktrace.cpp )
-target_link_libraries(SimpleStacktrace dl)
+if (USE_TESTS)
+    add_subdirectory(test/unittest)
+endif()
 
-### Simple Exception
-add_executable(SimpleException examples/SimpleException.cpp )
-target_link_libraries(SimpleException dl)
+if (USE_EXAMPLES)
+    ### Simple Stacktrace
+    add_executable(SimpleStacktrace examples/SimpleStacktrace.cpp)
+    target_link_libraries(SimpleStacktrace EasyException dl)
 
-### Custom Exception
-add_executable(CustomException examples/CustomException.cpp )
-target_link_libraries(CustomException dl)
+    ### Simple Exception
+    add_executable(SimpleException examples/SimpleException.cpp)
+    target_link_libraries(SimpleException EasyException dl)
 
-### Json Exception
-add_executable(JsonException examples/JsonException.cpp )
-target_link_libraries(JsonException dl)
+    ### Custom Exception
+    add_executable(CustomException examples/CustomException.cpp)
+    target_link_libraries(CustomException EasyException dl)
 
-### Test multiple includes of the exception header file in the same project
-add_executable(TestMultipleIncludes tests/multipleincludes/main.cpp tests/multipleincludes/SampleOne.cpp tests/multipleincludes/SampleOne.h tests/multipleincludes/SampleTwo.cpp tests/multipleincludes/SampleTwo.h tests/multipleincludes/SampleThree.cpp tests/multipleincludes/SampleThree.h)
-target_link_libraries(TestMultipleIncludes dl)
+    ### Json Exception
+    add_executable(JsonException examples/JsonException.cpp)
+    target_link_libraries(JsonException EasyException dl)
+
+        ### Defualt Logging
+        add_executable(DefaultLogging examples/DefaultLogging.cpp)
+        target_link_libraries(DefaultLogging EasyException dl)
+
+    ### Logger Inheritance
+    add_executable(LoggerInheritance examples/LoggerInheritance.cpp)
+    target_link_libraries(LoggerInheritance EasyException)
+endif()

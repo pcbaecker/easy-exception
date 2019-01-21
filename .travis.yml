@@ -1,0 +1,48 @@
+language: cpp
+
+matrix:
+  include:
+
+    # gcc-7
+    - os: linux
+      dist: xenial
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+    # clang 7.0
+    - os: linux
+      dist: xenial
+      compiler: clang
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - libstdc++-7-dev
+      env:
+        - MATRIX_EVAL=""
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+
+before_script:
+  - mkdir cmake-build-test
+  - cd cmake-build-test
+  - cmake ..
+
+script:
+  - make
+  - test/unittest/EasyExceptionUnitTest
+  - ./CustomException
+  - ./JsonException
+  - ./SimpleException
+  - ./SimpleStacktrace
+  - ./DefaultLogging
+  - ./LoggerInheritance

@@ -1,13 +1,24 @@
-# Easy Exception
+# Easy Exception (and logging)
+
+[![Build Status](https://travis-ci.org/pcbaecker/easy-exception.svg?branch=master)](https://travis-ci.org/pcbaecker/easy-exception)
 
 This framework is intended be easy to use and provide exceptions with stacktrace and custom debug information.
 
+### Install
+
+The easiest way to use this framework is to add it as a cmake sub project.
+
+    add_subdirectory( dependencies/easy-exception )
+    include_directories( dependencies/easy-exception/include )
+
 ### How to use
 
-In the folder examples/ you can find some examples on how to use the stacktrace or exception classes.
-The library is header only, that means to use it you just have to include the files contained in the include/ directory.
+In the /examples folder you can find some examples on how to use the different features.
+More detailed description can be found in the wiki:
 
-##### Quick start
+https://github.com/pcbaecker/easy-exception/wiki
+
+##### Exceptions
 
 An Exception is thrown with the base ee::Exception that inherits from std::exception. It collects the interesting information and stores it:
 
@@ -59,17 +70,21 @@ The catched std::exception will print an output like the following:
     [8] __libc_start_main
     [9] _start
 
-##### Custom exception
-
-Define a custom exception and create it instead of ee::Exception
+Define a custom exception and throw it instead of ee::Exception
 
     DEFINE_EXCEPTION(MyCustomException);
 
-##### Set output format
+##### Logging
 
-Currently there are two output formats 'String' and 'Json'
+Logging can be achieved by using the global log method:
 
-    throw e.build(ee::ExceptionThrower::OutputFormat::Json);
+    ee::Log::log(ee::LogLevel::Trace, 
+                 "Classname", 
+                 __PRETTY_FUNCTION__, 
+                 "This message is just a trace", {
+                    ee::Note("Username", "Peter"),
+                    ee::Note("Age", 28)
+                 });
 
 ### Hints
 
