@@ -5,6 +5,8 @@
 TEST_CASE("ee::SuspendLogging") {
 
     ee::Log::reset();
+    ee::Log::removeOutstreams();
+    ee::Log::removeCallbacks();
 
     // Make a first log entry
     REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
