@@ -11,6 +11,7 @@
 #include "Exception.hpp"
 #include "SuspendLogging.hpp"
 #include "LogEntry.hpp"
+#include "LogRetentionPolicy.hpp"
 
 namespace ee {
 
@@ -118,6 +119,37 @@ namespace ee {
          */
         static void removeOutstreams() noexcept;
 
+        /**
+         * @brief Returns the map of outstreams.
+         *
+         * @return Reference to the map of outstreams.
+         */
+        static const std::map<LogLevel, std::ostream*>& getOutstreams() noexcept;
+
+        /**
+         * @brief Registers a log retention policy.
+         *
+         * @param policy The policy to register.
+         */
+        static void registerLogRententionPolicy(std::shared_ptr<LogRetentionPolicy> policy) noexcept;
+
+        /**
+         * @brief Removes all log retention policies.
+         */
+        static void removeLogRetentionPolicies() noexcept;
+
+        /**
+         * @brief Returns the map of log retention policies.
+         *
+         * @return Reference to the map of log retention policies.
+         */
+        static const std::map<uint8_t,std::shared_ptr<LogRetentionPolicy>>& getLogRetentionPolicies() noexcept;
+
+        /**
+         * @brief Releases all logs that are not retained by the retention policies.
+         */
+        static void releaseLogs() noexcept;
+
     private:
         /**
          * @brief The mutex that manages the log-thread map. It must be locked every time the LogThreadMap
@@ -146,6 +178,11 @@ namespace ee {
          * @brief This map contains the output streams that should be used for the specific LogLevels.
          */
         static std::map<LogLevel, std::ostream*> OutStreamMap;
+
+        /**
+         * @brief This map holds the log retention policies.
+         */
+        static std::map<uint8_t,std::shared_ptr<LogRetentionPolicy>> LogRetentionPolicies;
     };
 
 }

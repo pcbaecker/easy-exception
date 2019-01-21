@@ -13,6 +13,7 @@ TEST_CASE("ee:Log") {
     ee::Log::reset();
     ee::Log::removeCallbacks();
     ee::Log::removeOutstreams();
+    ee::Log::removeLogRetentionPolicies();
 
     SECTION("const std::map<std::thread::id, std::list<LogEntry>>& getLogThreadMap() noexcept") {
         ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
@@ -54,80 +55,6 @@ TEST_CASE("ee:Log") {
             REQUIRE(log.getStacktrace().has_value());
             REQUIRE_FALSE(log.getStacktrace()->get()->getLines().empty());
             REQUIRE(log.getDateOfCreation().time_since_epoch().count() > 0);
-        }
-
-        SECTION("Log in multiple threads to test the thread-safe mechanism") {
-            REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
-
-            // Create 10 threads
-            std::vector<std::thread> threads;
-            std::vector<std::thread::id> threadIds;
-            auto start = std::chrono::system_clock::now();
-            for (int i = 0; i < 10; i++) {
-                // Create thread
-                threads.emplace_back([]() {
-                    // Create 1.000.000 log entries
-                    for (int j = 0; j < 1000000; j++) {
-                        ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "Log entry " + std::to_string(j), {});
-                    }
-                });
-
-                // Store the threads id
-                threadIds.push_back(threads[i].get_id());
-            }
-
-            // Wait for all 10 threads to finish
-            for (int i = 0; i < 10; i++) {
-                threads[i].join();
-            }
-            auto end = std::chrono::system_clock::now();
-            std::chrono::duration<double> elapsed_seconds = end - start;
-            std::cout << "Creating 10.000.000 log entries took " << elapsed_seconds.count() << "s" << std::endl;
-
-            // In total we should now have 10.000.000 log entries
-            REQUIRE(ee::Log::getNumberOfLogEntries() == 10000000);
-
-            // Every single one of the previously used threads must have generated 1.000.000 log entries
-            for (auto& threadId : threadIds) {
-                REQUIRE(ee::Log::getLogThreadMap().count(threadId) == 1);
-                REQUIRE(ee::Log::getLogThreadMap().at(threadId).size() == 1000000);
-            }
-        }
-
-        SECTION("Log in multiple threads and use the callback meanwhile") {
-            // Register a callback for the warning logs
-            size_t counter = 0;
-            ee::Log::registerCallback(ee::LogLevel::Warning, [&](const ee::LogEntry& logEntry) {
-                REQUIRE(logEntry.getLogLevel() == ee::LogLevel::Warning);
-                counter++;
-
-                // Reset every 10.000 warnings
-                if (counter % 10000 == 0) {
-                    ee::Log::reset();
-                }
-            });
-
-            // Create 10 threads
-            std::vector<std::thread> threads;
-            for (int i = 0; i < 10; i++) {
-                // Create thread
-                threads.emplace_back([](ee::LogLevel logLevel) {
-                    // Create 1.000.000 log entries
-                    for (int j = 0; j < 1000000; j++) {
-                        ee::Log::log(logLevel, "MyClass", "SomeMethod", "Log entry " + std::to_string(j), {});
-                    }
-
-                    // The first thread uses LogLevel 'Warning', the others use 'Info'
-                }, i == 0 ? ee::LogLevel::Warning : ee::LogLevel::Info);
-            }
-
-            // Wait for all 10 threads to finish
-            for (int i = 0; i < 10; i++) {
-                threads[i].join();
-            }
-
-            // The counter should have registered 1.000.000 warnings
-            REQUIRE(counter == 1000000);
         }
     }
 
@@ -200,7 +127,9 @@ TEST_CASE("ee:Log") {
         std::ostream stream(&stringBuffer);
 
         // Register a stream on the warning level
+        REQUIRE(ee::Log::getOutstreams().empty());
         ee::Log::registerOutstream(ee::LogLevel::Warning, stream);
+        REQUIRE(ee::Log::getOutstreams().size() == 1);
         REQUIRE(stringBuffer.str().length() == 0);
 
         // Log an info
@@ -235,8 +164,52 @@ TEST_CASE("ee:Log") {
         REQUIRE(stringBuffer.str().length() == 0);
     }
 
+    SECTION("const std::map<LogLevel, std::ostream*>& getOutstreams() noexcept") {
+        REQUIRE(ee::Log::getOutstreams().empty());
+        ee::Log::registerOutstream(ee::LogLevel::Warning, std::cout);
+        REQUIRE(ee::Log::getOutstreams().size() == 1);
+    }
+
     SECTION("void applyDefaultConfiguration() noexcept") {
         ee::Log::applyDefaultConfiguration();
+
+        REQUIRE(ee::Log::getOutstreams().size() == 4);
+        REQUIRE(ee::Log::getCallbackMap().size() == 3);
+    }
+
+    SECTION("void registerLogRententionPolicy(std::shared_ptr<LogRetentionPolicy>) noexcept") {
+        REQUIRE(ee::Log::getLogRetentionPolicies().empty());
+
+        ee::Log::registerLogRententionPolicy(std::make_shared<ee::LogRetentionMaxNumber>(16));
+
+        REQUIRE(ee::Log::getLogRetentionPolicies().size() == 1);
+    }
+
+    SECTION("void removeLogRetentionPolicies() noexcept") {
+        REQUIRE(ee::Log::getLogRetentionPolicies().empty());
+        ee::Log::registerLogRententionPolicy(std::make_shared<ee::LogRetentionMaxNumber>(16));
+        REQUIRE(ee::Log::getLogRetentionPolicies().size() == 1);
+        ee::Log::removeLogRetentionPolicies();
+        REQUIRE(ee::Log::getLogRetentionPolicies().empty());
+    }
+
+    SECTION("const std::map<uint8_t,std::shared_ptr<LogRetentionPolicy>>& getLogRetentionPolicies() noexcept") {
+        REQUIRE(ee::Log::getLogRetentionPolicies().empty());
+        ee::Log::registerLogRententionPolicy(std::make_shared<ee::LogRetentionMaxNumber>(16));
+        REQUIRE(ee::Log::getLogRetentionPolicies().size() == 1);
+    }
+
+    SECTION("void releaseLogs() noexcept") {
+        // Create 64 logs
+        for (int i = 0; i < 64; i++) {
+            ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
+        }
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 64);
+
+        // Register log retention policy that only retains 32 log entries
+        ee::Log::registerLogRententionPolicy(std::make_shared<ee::LogRetentionMaxNumber>(32));
+        ee::Log::releaseLogs();
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 32);
     }
 
 }

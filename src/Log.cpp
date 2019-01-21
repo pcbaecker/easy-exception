@@ -5,10 +5,19 @@
 namespace ee {
 
     static std::string logFolder;
+    std::recursive_mutex Log::Mutex;
+    std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
+    std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
+    std::map<LogLevel,std::function<void(const LogEntry&)>> Log::CallbackMap;
+    std::map<LogLevel, std::ostream*> Log::OutStreamMap;
+    std::map<uint8_t,std::shared_ptr<LogRetentionPolicy>> Log::LogRetentionPolicies;
 
     void logLevelHandler(const LogEntry& logEntry) noexcept {
         // We suspend logging for the whole scope of this function
         SuspendLogging suspendLogging;
+
+        // We have to release all logs that are too old
+        ee::Log::releaseLogs();
 
         // We want to write all logs to a file
         auto timestamp = std::chrono::system_clock::now();
@@ -30,12 +39,6 @@ namespace ee {
         // We can now exit this program
         exit(signal);
     }
-
-    std::recursive_mutex Log::Mutex;
-    std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
-    std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
-    std::map<LogLevel,std::function<void(const LogEntry&)>> Log::CallbackMap;
-    std::map<LogLevel, std::ostream*> Log::OutStreamMap;
 
     void Log::log(
             LogLevel logLevel,
@@ -183,6 +186,10 @@ namespace ee {
         OutStreamMap.clear();
     }
 
+    const std::map<LogLevel, std::ostream *> &Log::getOutstreams() noexcept {
+        return OutStreamMap;
+    }
+
     void Log::applyDefaultConfiguration(const std::string& pathToLogFolder) noexcept {
         // Register the outstream
         registerOutstream(LogLevel::Info, std::cout);
@@ -210,5 +217,57 @@ namespace ee {
         registerCallback(ee::LogLevel::Warning, std::bind(&logLevelHandler, std::placeholders::_1));
         registerCallback(ee::LogLevel::Error, std::bind(&logLevelHandler, std::placeholders::_1));
         registerCallback(ee::LogLevel::Fatal, std::bind(&logLevelHandler, std::placeholders::_1));
+
+        // Register the default log retention policy
+        registerLogRententionPolicy(std::make_shared<LogRetentionOlderThan>(std::chrono::minutes(5)));
+    }
+
+    void Log::registerLogRententionPolicy(std::shared_ptr<LogRetentionPolicy> policy) noexcept {
+        LogRetentionPolicies[policy->mPriority] = policy;
+    }
+
+    void Log::removeLogRetentionPolicies() noexcept {
+        LogRetentionPolicies.clear();
+    }
+
+    const std::map<uint8_t, std::shared_ptr<LogRetentionPolicy>> &Log::getLogRetentionPolicies() noexcept {
+        return LogRetentionPolicies;
+    }
+
+    void Log::releaseLogs() noexcept {
+        // Suspend logging for the scope of this method
+        SuspendLogging suspendLogging;
+
+        // We thave to get the list pointer for this thread, we modify the parent map and that requires concurrent logic
+        std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
+
+        // Go through the different threads
+        for (auto& thread : LogThreadMap) {
+            // Init the log retention policies
+            for (auto& policy : LogRetentionPolicies) {
+                policy.second->init();
+            }
+
+            // Go through all logs from the youngest to the oldest
+            auto it = thread.second.rbegin();
+            while (it != thread.second.rend()) {
+                // Go through all policies
+                bool removeLogEntry = false;
+                for (auto& policy : LogRetentionPolicies) {
+                    if (!policy.second->retain(*it)) {
+                        // This log entry should be deleted by this policy
+                        removeLogEntry = true;
+                        break;
+                    }
+                }
+
+                // Remove or increase the iterator
+                if (removeLogEntry) {
+                    thread.second.erase(std::next(it).base());
+                } else {
+                    it++;
+                }
+            }
+        }
     }
 }

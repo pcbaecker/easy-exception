@@ -13,6 +13,7 @@ target_link_libraries(EasyException dl)
 
 if (USE_TESTS)
     add_subdirectory(test/unittest)
+    add_subdirectory(test/integrationtest)
 endif()
 
 if (USE_EXAMPLES)
