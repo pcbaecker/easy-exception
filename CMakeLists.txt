@@ -32,11 +32,20 @@ if (USE_EXAMPLES)
     add_executable(JsonException examples/JsonException.cpp)
     target_link_libraries(JsonException EasyException dl)
 
-        ### Defualt Logging
-        add_executable(DefaultLogging examples/DefaultLogging.cpp)
-        target_link_libraries(DefaultLogging EasyException dl)
+    ### Defualt Logging
+    add_executable(DefaultLogging examples/DefaultLogging.cpp)
+    target_link_libraries(DefaultLogging EasyException dl)
 
     ### Logger Inheritance
     add_executable(LoggerInheritance examples/LoggerInheritance.cpp)
-    target_link_libraries(LoggerInheritance EasyException)
+    target_link_libraries(LoggerInheritance EasyException dl)
+
+    ### Signal handler
+    add_executable(SignalHandler examples/SignalHandler.cpp)
+    target_link_libraries(SignalHandler EasyException dl)
+
+    ### Default configuration
+    add_executable(DefaultConfiguration examples/DefaultConfiguration.cpp)
+    target_link_libraries(DefaultConfiguration EasyException dl)
+
 endif()

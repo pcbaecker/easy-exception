@@ -86,6 +86,11 @@ Logging can be achieved by using the global log method:
                     ee::Note("Age", 28)
                  });
 
+To quickstart using all log features like auto auto log retention, signal-handling and log persistence use this method 
+at the beginning of your program:
+
+    ee::Log::applyDefaultConfiguration("path/to/my/logs");
+
 ### Hints
 
 ##### Compiler

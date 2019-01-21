@@ -1,7 +1,35 @@
 #include <ee/Log.hpp>
 #include <fstream>
+#include <csignal>
 
 namespace ee {
+
+    static std::string logFolder;
+
+    void logLevelHandler(const LogEntry& logEntry) noexcept {
+        // We suspend logging for the whole scope of this function
+        SuspendLogging suspendLogging;
+
+        // We want to write all logs to a file
+        auto timestamp = std::chrono::system_clock::now();
+        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
+        ee::Log::writeToFile(logFolder + "ee-log-" + std::to_string(microseconds) + ".log");
+
+        // After we wrote all logs to a file we clear the log cache
+        Log::reset();
+    }
+
+    void signalHandler(int signal) noexcept {
+        // Create a log entry for this event
+        ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, "Received signal", {
+                ee::Note("Signal code", signal, __PRETTY_FUNCTION__)
+        }, ee::Stacktrace::create());
+
+        // A file for this kind of error will automatically be created through the LogLevelHandler
+
+        // We can now exit this program
+        exit(signal);
+    }
 
     std::recursive_mutex Log::Mutex;
     std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
@@ -128,7 +156,7 @@ namespace ee {
             if (!thread.second.empty()) {
                 // Write the headline for this thread
                 for (int i = 0; i < 32; i++) {file << '#';}
-                file << "### " << thread.first;
+                file << "### " << thread.first << " ";
                 for (int i = 0; i < 32; i++) {file << '#';}
                 file << "\n";
 
@@ -153,5 +181,34 @@ namespace ee {
 
     void Log::removeOutstreams() noexcept {
         OutStreamMap.clear();
+    }
+
+    void Log::applyDefaultConfiguration(const std::string& pathToLogFolder) noexcept {
+        // Register the outstream
+        registerOutstream(LogLevel::Info, std::cout);
+        registerOutstream(LogLevel::Warning, std::cerr);
+        registerOutstream(LogLevel::Error, std::cerr);
+        registerOutstream(LogLevel::Fatal, std::cerr);
+
+        // Register signal handler
+        std::signal(SIGSEGV, signalHandler);
+        std::signal(SIGFPE, signalHandler);
+        std::signal(SIGSTOP, signalHandler);
+        std::signal(SIGILL, signalHandler);
+        std::signal(SIGBUS, signalHandler);
+        std::signal(SIGABRT, signalHandler);
+        std::signal(SIGTERM, signalHandler);
+
+        // Store the folder where we want to store logs
+        if (!pathToLogFolder.empty() && pathToLogFolder[pathToLogFolder.size()-1] != '/') {
+            logFolder = pathToLogFolder + "/";
+        } else {
+            logFolder = pathToLogFolder;
+        }
+
+        // Register a handler for Warning,Error,Fatal
+        registerCallback(ee::LogLevel::Warning, std::bind(&logLevelHandler, std::placeholders::_1));
+        registerCallback(ee::LogLevel::Error, std::bind(&logLevelHandler, std::placeholders::_1));
+        registerCallback(ee::LogLevel::Fatal, std::bind(&logLevelHandler, std::placeholders::_1));
     }
 }
