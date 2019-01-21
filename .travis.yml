@@ -42,6 +42,7 @@ script:
   - test/unittest/EasyExceptionUnitTest
   - ./CustomException
   - ./JsonException
-  - ./LoggerInheritance
   - ./SimpleException
   - ./SimpleStacktrace
+  - ./DefaultLogging
+  - ./LoggerInheritance

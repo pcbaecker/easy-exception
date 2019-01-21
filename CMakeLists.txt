@@ -17,20 +17,24 @@ endif()
 
 if (USE_EXAMPLES)
     ### Simple Stacktrace
-    add_executable(SimpleStacktrace examples/SimpleStacktrace.cpp )
+    add_executable(SimpleStacktrace examples/SimpleStacktrace.cpp)
     target_link_libraries(SimpleStacktrace EasyException dl)
 
     ### Simple Exception
-    add_executable(SimpleException examples/SimpleException.cpp )
+    add_executable(SimpleException examples/SimpleException.cpp)
     target_link_libraries(SimpleException EasyException dl)
 
     ### Custom Exception
-    add_executable(CustomException examples/CustomException.cpp )
+    add_executable(CustomException examples/CustomException.cpp)
     target_link_libraries(CustomException EasyException dl)
 
     ### Json Exception
-    add_executable(JsonException examples/JsonException.cpp )
+    add_executable(JsonException examples/JsonException.cpp)
     target_link_libraries(JsonException EasyException dl)
+
+        ### Defualt Logging
+        add_executable(DefaultLogging examples/DefaultLogging.cpp)
+        target_link_libraries(DefaultLogging EasyException dl)
 
     ### Logger Inheritance
     add_executable(LoggerInheritance examples/LoggerInheritance.cpp)

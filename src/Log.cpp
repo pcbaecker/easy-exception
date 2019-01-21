@@ -38,7 +38,9 @@ namespace ee {
 
         // Check if we should display a copy of the logEntry in an outstream (e.g.: std::cout)
         if (OutStreamMap.count(logLevel)) {
-            (*OutStreamMap.at(logLevel)) << "yo" << std::endl;
+            auto& stream = *OutStreamMap.at(logLevel);
+            logEntry.write(stream);
+            stream << std::endl << std::endl;
         }
 
         // Check if we have a callback function for this LogLevel
@@ -132,30 +134,11 @@ namespace ee {
 
                 // Iterate through all log entries for this thread
                 for (auto& logEntry : thread.second) {
-                    file << toString(logEntry.getLogLevel()) << " -> ";
-                    auto dateOfCreation = std::chrono::system_clock::to_time_t(logEntry.getDateOfCreation());
-                    std::string dateOfCreationStr = std::ctime(&dateOfCreation);
-                    file << "DateOfCreation={ " << dateOfCreationStr.substr(0, dateOfCreationStr.length()-1)  << " } ";
-                    if (!logEntry.getClassname().empty()) {
-                        file << "Classname={ " << logEntry.getClassname() << "} ";
-                    }
-                    if (!logEntry.getMethod().empty()) {
-                        file << "Method={ " << logEntry.getMethod() << " } ";
-                    }
-                    if (!logEntry.getMessage().empty()) {
-                        file << "Message={ " << logEntry.getMessage() << " } ";
-                    }
-                    file << "\n";
-                    if (!logEntry.getNotes().empty()) {
-                        for (auto& note : logEntry.getNotes()) {
-                            file << "\t" << note.getName() << ": " << note.getValue();
-                            if (!note.getCaller().empty()) {
-                                file << " { " << note.getCaller() << " }";
-                            }
-                            file << "\n";
-                        }
-                    }
-                    file << "\n\n";
+                    // Write log entry to file
+                    logEntry.write(file);
+
+                    // Write space between each log entry
+                    file << std::endl << std::endl;
                 }
             }
         }
