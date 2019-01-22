@@ -19,6 +19,20 @@ TEST_CASE("ee::Note") {
     REQUIRE(noteUint64.getValue() == "1234567");
     ee::Note noteInt64("int64_t", static_cast<int64_t>(-1234567));
     REQUIRE(noteInt64.getValue() == "-1234567");
+
+    ee::Note noteUnsignedShort("unsigned short", static_cast<unsigned short>(321));
+    REQUIRE(noteUnsignedShort.getValue() == "321");
+    ee::Note noteShort("short", static_cast<short>(-321));
+    REQUIRE(noteShort.getValue() == "-321");
+    ee::Note noteUnsignedInt("unsigned int", static_cast<unsigned int>(54321));
+    REQUIRE(noteUnsignedInt.getValue() == "54321");
+    ee::Note noteInt("int", static_cast<int>(-54321));
+    REQUIRE(noteInt.getValue() == "-54321");
+    ee::Note noteUnsignedLong("unsigned long", static_cast<unsigned long>(7654321));
+    REQUIRE(noteUnsignedLong.getValue() == "7654321");
+    ee::Note noteLong("long", static_cast<long>(-7654321));
+    REQUIRE(noteLong.getValue() == "-7654321");
+
     ee::Note noteFloat("float", static_cast<float>(3.14f));
     REQUIRE(noteFloat.getValue().find("3.14") != std::string::npos);
     ee::Note noteDouble("double", static_cast<double>(123.123));

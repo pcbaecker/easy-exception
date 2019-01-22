@@ -46,6 +46,9 @@ namespace ee {
 #if defined(__APPLE__) || defined(__EMSCRIPTEN__)
         explicit Note(std::string name, size_t value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+
+        explicit Note(std::string name, long value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 #endif
 
         const std::string& getName() const noexcept {
