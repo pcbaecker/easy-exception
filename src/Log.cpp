@@ -294,4 +294,31 @@ namespace ee {
             }
         }
     }
+
+    std::map<LogLevel, size_t> Log::countLogLevels() noexcept {
+        // Suspend logging for the scope of this method
+        SuspendLogging suspendLogging;
+
+        // We thave to get the list pointer for this thread, we modify the parent map and that requires concurrent logic
+        std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
+
+        // Create the map
+        std::map<LogLevel, size_t> map;
+
+        // Go through all threads and log entries
+        for (auto& thread : LogThreadMap) {
+            for (auto& logEntry : thread.second) {
+                // Check if we already have an entry for this log level
+                if (map.count(logEntry.getLogLevel())) {
+                    // Increase entry
+                    map.at(logEntry.getLogLevel())++;
+                } else {
+                    // Create entry
+                    map[logEntry.getLogLevel()] = 1;
+                }
+            }
+        }
+
+        return map;
+    }
 }

@@ -150,6 +150,13 @@ namespace ee {
          */
         static void releaseLogs() noexcept;
 
+        /**
+         * @brief Counts all log levels and returns a map containing the different amounts.
+         *
+         * @return Map containing the count for each log level.
+         */
+        static std::map<LogLevel,size_t> countLogLevels() noexcept;
+
     private:
         /**
          * @brief The mutex that manages the log-thread map. It must be locked every time the LogThreadMap

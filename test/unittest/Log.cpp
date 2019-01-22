@@ -212,4 +212,27 @@ TEST_CASE("ee:Log") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 32);
     }
 
+    SECTION("std::map<LogLevel,size_t> countLogLevels() noexcept") {
+        // Create some logs
+        for (int i = 0; i < 16; i++) {
+            ee::Log::log(ee::LogLevel::Info, "MyClass", "SomeMethod", "MyMessage", {});
+        }
+        for (int i = 0; i < 12; i++) {
+            ee::Log::log(ee::LogLevel::Warning, "MyClass", "SomeMethod", "MyMessage", {});
+        }
+        for (int i = 0; i < 25; i++) {
+            ee::Log::log(ee::LogLevel::Trace, "MyClass", "SomeMethod", "MyMessage", {});
+        }
+
+        // Count the log levels
+        auto map = ee::Log::countLogLevels();
+        REQUIRE(map.size() == 3);
+        REQUIRE(map.count(ee::LogLevel::Info));
+        REQUIRE(map.at(ee::LogLevel::Info) == 16);
+        REQUIRE(map.count(ee::LogLevel::Warning));
+        REQUIRE(map.at(ee::LogLevel::Warning) == 12);
+        REQUIRE(map.count(ee::LogLevel::Trace));
+        REQUIRE(map.at(ee::LogLevel::Trace) == 25);
+    }
+
 }
