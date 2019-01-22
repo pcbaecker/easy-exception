@@ -49,4 +49,8 @@ if (USE_EXAMPLES)
     add_executable(DefaultConfiguration examples/DefaultConfiguration.cpp)
     target_link_libraries(DefaultConfiguration EasyException dl)
 
+    ### Uncaught exception
+    add_executable(UncaughtException examples/UncaughtException.cpp)
+    target_link_libraries(UncaughtException EasyException dl)
+
 endif()

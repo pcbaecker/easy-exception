@@ -2,7 +2,12 @@
 
 [![Build Status](https://travis-ci.org/pcbaecker/easy-exception.svg?branch=master)](https://travis-ci.org/pcbaecker/easy-exception)
 
-This framework is intended be easy to use and provide exceptions with stacktrace and custom debug information.
+This framework is intended be easy to use and provide exceptions with stacktrace, logging and custom debug information.
+
+### Features missing
+
+* In case of cascading warnings or errors there will be multiple files written. 
+We need some possibility to wait for the 'last' log of that cascade and write the file with all previous logs there.
 
 ### Install
 
@@ -109,3 +114,4 @@ To globally set the output format you can define EASY_EXCEPTION_OUTPUT_FORMAT to
 In cmake:
 
     add_compile_definitions(EASY_EXCEPTION_OUTPUT_FORMAT=Json)
+    

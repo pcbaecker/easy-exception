@@ -49,3 +49,4 @@ script:
   - ./LoggerInheritance
   - ./SignalHandler
   - ./DefaultConfiguration || true
+  - ./UncaughtException || true

@@ -40,6 +40,27 @@ namespace ee {
         exit(signal);
     }
 
+    void terminateHandler() {
+        try {
+            // Rethrows the last exception
+            std::rethrow_exception(std::current_exception());
+        } catch (ee::Exception& e) {
+            // In case of an ee::Exception
+            ee::Log::log(ee::LogLevel::Fatal, e);
+        } catch (std::exception &e) {
+            // In case of std::exception
+            ee::Log::log(ee::LogLevel::Fatal, "", "Uncaught exception", e.what(), {}, ee::Stacktrace::create());
+        } catch (...) {
+            // In case some unknown exception
+            ee::Log::log(ee::LogLevel::Fatal, "", "Uncaught exception", "Unknown exeception", {}, ee::Stacktrace::create());
+        }
+
+        // A file for this kind of error will automatically be created through the LogLevelHandler
+
+        // We can now exit this program
+        std::abort();
+    }
+
     void Log::log(
             LogLevel logLevel,
             const std::string &classname,
@@ -205,6 +226,9 @@ namespace ee {
         std::signal(SIGBUS, signalHandler);
         std::signal(SIGABRT, signalHandler);
         std::signal(SIGTERM, signalHandler);
+
+        // Register terminationHandler (catches uncaught exceptions)
+        std::set_terminate(terminateHandler);
 
         // Store the folder where we want to store logs
         if (!pathToLogFolder.empty() && pathToLogFolder[pathToLogFolder.size()-1] != '/') {
