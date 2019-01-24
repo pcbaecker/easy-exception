@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(EasyException)
-option(USE_EXAMPLES "Use examples" ON)
-option(USE_TESTS "Use tests" ON)
+option(EE_USE_EXAMPLES "Use examples" ON)
+option(EE_USE_TESTS "Use tests" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -rdynamic)
@@ -11,12 +11,12 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 add_library(EasyException STATIC ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(EasyException dl)
 
-if (USE_TESTS)
+if (EE_USE_TESTS)
     add_subdirectory(test/unittest)
     add_subdirectory(test/integrationtest)
 endif()
 
-if (USE_EXAMPLES)
+if (EE_USE_EXAMPLES)
     ### Simple Stacktrace
     add_executable(SimpleStacktrace examples/SimpleStacktrace.cpp)
     target_link_libraries(SimpleStacktrace EasyException dl)
