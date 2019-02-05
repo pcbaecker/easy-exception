@@ -43,7 +43,12 @@ namespace ee {
     void terminateHandler() {
         try {
             // Rethrows the last exception
-            std::rethrow_exception(std::current_exception());
+            auto e = std::current_exception();
+            if (e != nullptr) {
+                std::rethrow_exception(e);
+            } else {
+                ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, "Terminate called", {}, ee::Stacktrace::create());
+            }
         } catch (ee::Exception& e) {
             // In case of an ee::Exception
             ee::Log::log(ee::LogLevel::Fatal, e);
