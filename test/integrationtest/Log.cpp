@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include <ee/Log.hpp>
+#include <ee/Helper.hpp>
 
 TEST_CASE("ee::Log") {
 
@@ -8,6 +9,25 @@ TEST_CASE("ee::Log") {
     ee::Log::removeCallbacks();
     ee::Log::removeOutstreams();
     ee::Log::removeLogRetentionPolicies();
+
+    // Remove all previously written logfiles
+    auto oldLogfiles = ee::Helper::findLogFiles();
+    for (auto& file : oldLogfiles) {
+        std::remove(file.c_str());
+    }
+
+    SECTION("Always write into the same file appending") {
+        ee::Log::applyDefaultConfiguration();
+        REQUIRE(ee::Helper::findLogFiles().empty());
+
+        // Incident one will be written to file
+        ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, "TEST", {});
+        REQUIRE(ee::Helper::findLogFiles().size() == 1);
+
+        // Incident two will be written to the same file
+        ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, "TEST TWO", {});
+        REQUIRE(ee::Helper::findLogFiles().size() == 1);
+    }
 
     SECTION("Log in multiple threads to test the thread-safe mechanism") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 0);

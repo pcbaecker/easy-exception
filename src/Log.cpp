@@ -5,6 +5,7 @@
 namespace ee {
 
     static std::string logFolder;
+    static std::string logFilename;
     std::recursive_mutex Log::Mutex;
     std::atomic_uint16_t Log::SuspendLoggingCounter = 0;
     std::map<std::thread::id, std::list<LogEntry>> Log::LogThreadMap;
@@ -19,10 +20,15 @@ namespace ee {
         // We have to release all logs that are too old
         ee::Log::releaseLogs();
 
+        // Create filename
+        if (logFilename.empty()) {
+            auto timestamp = std::chrono::system_clock::now();
+            auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
+            logFilename = logFolder + "ee-log-" + std::to_string(microseconds) + ".log";
+        }
+
         // We want to write all logs to a file
-        auto timestamp = std::chrono::system_clock::now();
-        auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
-        ee::Log::writeToFile(logFolder + "ee-log-" + std::to_string(microseconds) + ".log");
+        ee::Log::writeToFile(logFilename);
 
         // After we wrote all logs to a file we clear the log cache
         Log::reset();
@@ -77,7 +83,7 @@ namespace ee {
         thread_local std::list<LogEntry>* pList = nullptr;
 
         // Check if a pointer to the list is already generated
-        if (pList == nullptr) {
+        if (pList == nullptr) { // NOLINT
             // We thave to get the list pointer for this thread, we modify the parent map and that requires concurrent logic
             std::lock_guard<std::recursive_mutex> mutex(Log::Mutex);
 
@@ -167,9 +173,6 @@ namespace ee {
     bool Log::writeToFile(const std::string &filename, OutputFormat format) noexcept {
         // Suspend logging for the scope of this method
         SuspendLogging suspendLogging;
-
-        // Delete the file if it already exists, we done want to append the content
-        std::remove(filename.c_str());
 
         // Try to open file
         std::ofstream file;
