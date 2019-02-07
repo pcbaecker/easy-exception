@@ -174,9 +174,8 @@ namespace ee {
         // Suspend logging for the scope of this method
         SuspendLogging suspendLogging;
 
-        // Try to open file
-        std::ofstream file;
-        file.open(filename);
+        // Try to open file (for writing and appending)
+        std::ofstream file(filename, std::ios::out | std::ios::app);
         if (!file.is_open()) {
             // Could not open file for writing
             return false;

@@ -1,6 +1,17 @@
 #include "catch.hpp"
 #include <ee/Log.hpp>
 #include <ee/Helper.hpp>
+#include <fstream>
+
+size_t filesize(const std::string& filename) {
+    std::ifstream file(filename, std::ifstream::ate | std::ifstream::binary);
+    if (!file.is_open()) {
+        return 0;
+    }
+    auto filesize = static_cast<size_t>(file.tellg());
+    file.close();
+    return filesize;
+}
 
 TEST_CASE("ee::Log") {
 
@@ -22,11 +33,14 @@ TEST_CASE("ee::Log") {
 
         // Incident one will be written to file
         ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, "TEST", {});
-        REQUIRE(ee::Helper::findLogFiles().size() == 1);
+        auto files = ee::Helper::findLogFiles();
+        REQUIRE(files.size() == 1);
+        auto fs = filesize(files[0]);
 
         // Incident two will be written to the same file
         ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, "TEST TWO", {});
         REQUIRE(ee::Helper::findLogFiles().size() == 1);
+        REQUIRE(fs*1.5f < filesize(files[0]));
     }
 
     SECTION("Log in multiple threads to test the thread-safe mechanism") {
