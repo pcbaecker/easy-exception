@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.6)
 project(EasyException)
 option(EE_USE_EXAMPLES "Use examples" ON)
 option(EE_USE_TESTS "Use tests" ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS -rdynamic)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_FLAGS -rdynamic)
 include_directories(include)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
