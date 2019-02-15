@@ -6,6 +6,7 @@ option(EE_USE_TESTS "Use tests" ON)
 ### Currently android seems to be not able to handle the c++17 definition in cmake
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
     set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_FLAGS -rdynamic)
 endif()
 include_directories(include)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
