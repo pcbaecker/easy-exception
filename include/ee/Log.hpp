@@ -211,4 +211,18 @@ namespace ee {
 
 }
 
+#define TRACE(message, notes) ee::Log::log(ee::LogLevel::Trace, "", __PRETTY_FUNCTION__, message, notes)
+
+#undef INFO
+#define INFO(message, notes) ee::Log::log(ee::LogLevel::Info, "", __PRETTY_FUNCTION__, message, notes)
+
+#undef WARN
+#define WARN(message, notes) ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+
+#undef ERROR
+#define ERROR(message, notes) ee::Log::log(ee::LogLevel::Error, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+
+#undef FATAL
+#define FATAL(message, notes) ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+
 #endif

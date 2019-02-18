@@ -248,4 +248,58 @@ TEST_CASE("ee:Log") {
         REQUIRE(map.count(ee::LogLevel::Trace));
         REQUIRE(map.at(ee::LogLevel::Trace) == 25);
     }
+
+    SECTION("Log macros") {
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
+
+        SECTION("TRACE()") {
+            TRACE("mymessage", {
+                ee::Note("Name", "Peter")
+            });
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Trace));
+            REQUIRE(levels.at(ee::LogLevel::Trace) == 1);
+        }
+
+        SECTION("INFO()") {
+            INFO("mymessage", {
+                ee::Note("Name", "Peter")
+            });
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Info));
+            REQUIRE(levels.at(ee::LogLevel::Info) == 1);
+        }
+
+        SECTION("WARN()") {
+            WARN("mymessage", {
+                ee::Note("Name", "Peter")
+            });
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Warning));
+            REQUIRE(levels.at(ee::LogLevel::Warning) == 1);
+        }
+
+        SECTION("ERROR()") {
+            ERROR("mymessage", {
+                ee::Note("Name", "Peter")
+            });
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Error));
+            REQUIRE(levels.at(ee::LogLevel::Error) == 1);
+        }
+
+        SECTION("FATAL()") {
+            FATAL("mymessage", {
+                ee::Note("Name", "Peter")
+            });
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Fatal));
+            REQUIRE(levels.at(ee::LogLevel::Fatal) == 1);
+        }
+    }
 }
