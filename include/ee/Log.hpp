@@ -233,4 +233,7 @@ namespace ee {
 #undef FATAL
 #define FATAL(message, notes) ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
 
+#undef CATCH
+#define CATCH(loglevel, exception) ee::Log::log(loglevel, exception)
+
 #endif

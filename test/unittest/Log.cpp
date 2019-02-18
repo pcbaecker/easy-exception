@@ -318,5 +318,23 @@ TEST_CASE("ee:Log") {
             REQUIRE(levels.count(ee::LogLevel::Fatal));
             REQUIRE(levels.at(ee::LogLevel::Fatal) == 1);
         }
+
+        SECTION("CATCH(std::exception)") {
+            std::runtime_error e("myexcp");
+            CATCH(ee::LogLevel::Warning, e);
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Warning));
+            REQUIRE(levels.at(ee::LogLevel::Warning) == 1);
+        }
+
+        SECTION("CATCH(ee::Exception)") {
+            ee::Exception e("caller", "message", {});
+            CATCH(ee::LogLevel::Warning, e);
+            REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+            auto levels = ee::Log::countLogLevels();
+            REQUIRE(levels.count(ee::LogLevel::Warning));
+            REQUIRE(levels.at(ee::LogLevel::Warning) == 1);
+        }
     }
 }
