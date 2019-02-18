@@ -53,6 +53,14 @@ namespace ee {
         static void log(LogLevel logLevel, const Exception& exception) noexcept;
 
         /**
+         * @brief Converts the given exception into an LogEntry and stores that into the log list.
+         *
+         * @param logLevel The log level to use.
+         * @param exception The exception to convert.
+         */
+        static void log(LogLevel logLevel, const std::exception& exception) noexcept;
+
+        /**
          * @brief Checks the given condition and logs a warning in case that the condition fails.
          *
          * @param condition The condition that must be false to log a warning.

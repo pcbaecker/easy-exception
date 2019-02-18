@@ -84,6 +84,23 @@ TEST_CASE("ee:Log") {
         REQUIRE(logEntry.getStacktrace().has_value());
     }
 
+    SECTION("void log(LogLevel, const std::exception&) noexcept") {
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
+        std::runtime_error exception("error message");
+
+        ee::Log::log(ee::LogLevel::Warning, exception);
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 1);
+        REQUIRE(ee::Log::getLogThreadMap().count(std::this_thread::get_id()));
+        auto logEntries = ee::Log::getLogThreadMap().at(std::this_thread::get_id());
+        REQUIRE(logEntries.size() == 1);
+        auto& logEntry = *logEntries.cbegin();
+        REQUIRE(logEntry.getClassname() == "std::exception");
+        REQUIRE(logEntry.getMethod() == "std::exception");
+        REQUIRE(logEntry.getMessage() == "error message");
+        REQUIRE(logEntry.getNotes().size() == 0);
+        REQUIRE(logEntry.getStacktrace().has_value());
+    }
+
     SECTION("bool check(bool,const std::string&,const std::string&,const std::vector<Note>&,const std::optional<std::shared_ptr<Stacktrace>>&) noexcept") {
         REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
 

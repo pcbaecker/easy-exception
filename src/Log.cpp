@@ -165,6 +165,17 @@ namespace ee {
         );
     }
 
+    void Log::log(LogLevel logLevel, const std::exception &exception) noexcept {
+        log(
+                logLevel,
+                "std::exception",
+                "std::exception",
+                exception.what(),
+                {},
+                ee::Stacktrace::create()
+                );
+    }
+
     bool Log::check(
             bool condition,
             const std::string &method,
