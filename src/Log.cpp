@@ -238,6 +238,11 @@ namespace ee {
         // Suspend logging for the scope of this method
         SuspendLogging suspendLogging;
 
+        // We currently only support string format
+        if (format != OutputFormat::String) {
+            return false;
+        }
+
         // Try to open file (for writing and appending)
         std::ofstream file(filename, std::ios::out | std::ios::app);
         if (!file.is_open()) {

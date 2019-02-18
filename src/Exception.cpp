@@ -71,7 +71,7 @@ namespace ee {
                 case Json: {
                     // Format output as json
                     str += "{\n";
-                    str += "\"type\" : \"" + std::string(typeid(this).name()) + "\"";
+                    str += R"("type" : ")" + std::string(typeid(this).name()) + "\"";
                     str += ",\n\"datetime\" : \"" + std::string(datetime) + "\"";
                     if (!this->mCaller.empty()) {
                         str += ",\n\"method\" : \"" + this->mCaller + "\"";
