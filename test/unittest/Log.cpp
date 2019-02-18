@@ -84,6 +84,20 @@ TEST_CASE("ee:Log") {
         REQUIRE(logEntry.getStacktrace().has_value());
     }
 
+    SECTION("bool check(bool,const std::string&,const std::string&,const std::vector<Note>&,const std::optional<std::shared_ptr<Stacktrace>>&) noexcept") {
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
+
+        // Check is successful -> no logging
+        REQUIRE(ee::Log::check(true, "mymethod", "mymessage", {}));
+        REQUIRE(ee::Log::getNumberOfLogEntries() == 0);
+
+        // Check fails -> warning log
+        REQUIRE_FALSE(ee::Log::check(false, "mymethod", "mymessage", {}));
+        auto levels = ee::Log::countLogLevels();
+        REQUIRE(levels.count(ee::LogLevel::Warning));
+        REQUIRE(levels.at(ee::LogLevel::Warning) == 1);
+    }
+
     SECTION("void registerCallback(LogLevel logLevel, std::function<void(const LogEntry&)>) noexcept") {
         REQUIRE(ee::Log::getCallbackMap().empty());
         ee::Log::registerCallback(ee::LogLevel::Warning, [](const ee::LogEntry& logEntry) {});
@@ -234,5 +248,4 @@ TEST_CASE("ee:Log") {
         REQUIRE(map.count(ee::LogLevel::Trace));
         REQUIRE(map.at(ee::LogLevel::Trace) == 25);
     }
-
 }

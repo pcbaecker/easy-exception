@@ -53,6 +53,23 @@ namespace ee {
         static void log(LogLevel logLevel, const Exception& exception) noexcept;
 
         /**
+         * @brief Checks the given condition and logs a warning in case that the condition fails.
+         *
+         * @param condition The condition that must be false to log a warning.
+         * @param method The method where the logging occured.
+         * @param message The message to describe the incident.
+         * @param notes A vector of notes describing more details.
+         * @param stacktrace The stacktrace.
+         * @return The condition.
+         */
+        static bool check(
+                bool condition,
+                const std::string& method,
+                const std::string& message,
+                const std::vector<Note>& notes,
+                const std::optional<std::shared_ptr<Stacktrace>>& stacktrace = std::nullopt) noexcept;
+
+        /**
          * @brief Returns a reference to the log-thread map. Using it can be critical due to the multi-threaded-nature of this framework.
          *
          * @return Reference to the log-thread map.

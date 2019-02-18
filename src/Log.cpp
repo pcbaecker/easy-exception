@@ -165,6 +165,18 @@ namespace ee {
         );
     }
 
+    bool Log::check(
+            bool condition,
+            const std::string &method,
+            const std::string &message,
+            const std::vector<Note> &notes,
+            const std::optional<std::shared_ptr<Stacktrace>> &stacktrace) noexcept {
+        if (!condition) {
+            log(ee::LogLevel::Warning, "", method, message, notes, stacktrace);
+        }
+        return condition;
+    }
+
     const std::map<std::thread::id, std::list<LogEntry>> &Log::getLogThreadMap() noexcept {
         return Log::LogThreadMap;
     }
