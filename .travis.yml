@@ -25,7 +25,8 @@ matrix:
           sources:
           - ubuntu-toolchain-r-test
           packages:
-          - libstdc++-7-dev
+            - libstdc++-7-dev
+            - clang-tidy-7
       env:
         - MATRIX_EVAL=""
 
