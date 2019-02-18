@@ -12,7 +12,7 @@ namespace ee {
 
          * @param name Name of the logger (e.g.: classname)
          */
-        explicit Logger() noexcept = default;
+        Logger() noexcept = default;
 
         void setName(const std::string& name) noexcept;
 
