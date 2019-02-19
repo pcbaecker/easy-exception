@@ -52,7 +52,8 @@ script:
   - ./SignalHandler
   - ./DefaultConfiguration || true
   - ./UncaughtException || true
-  - mkdir $TRAVIS_BUILD_DIR/cmake-clang-tidy
-  - cd $TRAVIS_BUILD_DIR/cmake-clang-tidy
+
+  - mkdir $TRAVIS_BUILD_DIR/cmake-build-tidy
+  - cd $TRAVIS_BUILD_DIR/cmake-build-tidy
   - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-  - run-clang-tidy.py ..
+  - $TRAVIS_BUILD_DIR/tools/run-clang-tidy.py $TRAVIS_BUILD_DIR/cmake-build-tidy

@@ -30,7 +30,7 @@ int main() {
 
     // We provoke a SIGSEGV
     std::list<std::string>* pList = nullptr;
-    std::cout << pList->size() << std::endl;
+    std::cout << pList->size() << std::endl;// NOLINT
 
     std::cout << "Leaving program" << std::endl;
     return EXIT_FAILURE;

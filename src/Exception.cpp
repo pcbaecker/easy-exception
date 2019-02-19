@@ -1,4 +1,5 @@
 #include <ee/Exception.hpp>
+#include <cstring>
 
 namespace ee {
 
@@ -35,7 +36,7 @@ namespace ee {
             char datetime[128];
             auto time = std::chrono::system_clock::to_time_t(this->mTimepoint);
             if (!std::strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S", std::localtime(&time))) {
-                strcpy(datetime, "Unknown");
+                memset(datetime, 0, sizeof(datetime));
             }
 
             // Determine the format
