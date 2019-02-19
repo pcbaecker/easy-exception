@@ -25,16 +25,22 @@ namespace ee {
         explicit Note(std::string name, int16_t value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Note(std::string name, uint32_t value, std::string caller = "") noexcept
+        explicit Note(std::string name, unsigned int value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Note(std::string name, int32_t value, std::string caller = "") noexcept
+        explicit Note(std::string name, int value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Note(std::string name, uint64_t value, std::string caller = "") noexcept
+        explicit Note(std::string name, unsigned long value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
-        explicit Note(std::string name, int64_t value, std::string caller = "") noexcept
+        explicit Note(std::string name, long value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+
+        explicit Note(std::string name, unsigned long long int value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+
+        explicit Note(std::string name, long long int value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
         explicit Note(std::string name, float value, std::string caller = "") noexcept
@@ -43,6 +49,9 @@ namespace ee {
         explicit Note(std::string name, double value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 
+        explicit Note(std::string name, long double value, std::string caller = "") noexcept
+                : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
+/*
 #if defined(__APPLE__) || defined(__EMSCRIPTEN__)
         explicit Note(std::string name, size_t value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
@@ -50,7 +59,7 @@ namespace ee {
         explicit Note(std::string name, long value, std::string caller = "") noexcept
                 : mName(std::move(name)), mValue(std::to_string(value)), mCaller(std::move(caller)) {}
 #endif
-
+*/
         const std::string& getName() const noexcept {
             return this->mName;
         }
