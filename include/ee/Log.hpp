@@ -219,19 +219,19 @@ namespace ee {
 
 }
 
-#define TRACE(message, notes) ee::Log::log(ee::LogLevel::Trace, "", __PRETTY_FUNCTION__, message, notes)
+#define TRACE(message, ...) ee::Log::log(ee::LogLevel::Trace, "", __PRETTY_FUNCTION__, message, __VA_ARGS__)
 
 #undef INFO
-#define INFO(message, notes) ee::Log::log(ee::LogLevel::Info, "", __PRETTY_FUNCTION__, message, notes)
+#define INFO(message, ...) ee::Log::log(ee::LogLevel::Info, "", __PRETTY_FUNCTION__, message, __VA_ARGS__)
 
 #undef WARN
-#define WARN(message, notes) ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+#define WARN(message, ...) ee::Log::log(ee::LogLevel::Warning, "", __PRETTY_FUNCTION__, message, __VA_ARGS__, ee::Stacktrace::create())
 
 #undef ERROR
-#define ERROR(message, notes) ee::Log::log(ee::LogLevel::Error, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+#define ERROR(message, ...) ee::Log::log(ee::LogLevel::Error, "", __PRETTY_FUNCTION__, message, __VA_ARGS__, ee::Stacktrace::create())
 
 #undef FATAL
-#define FATAL(message, notes) ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, message, notes, ee::Stacktrace::create())
+#define FATAL(message, ...) ee::Log::log(ee::LogLevel::Fatal, "", __PRETTY_FUNCTION__, message, __VA_ARGS__, ee::Stacktrace::create())
 
 #undef CATCH
 #define CATCH(loglevel, exception) ee::Log::log(loglevel, exception)
