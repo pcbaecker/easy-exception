@@ -13,6 +13,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-7
+            - doxygen
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
@@ -28,6 +29,7 @@ matrix:
           packages:
             - libstdc++-7-dev
             - clang-tidy-7
+            - doxygen
       env:
         - MATRIX_EVAL=""
 
