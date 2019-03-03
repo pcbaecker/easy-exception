@@ -3,8 +3,24 @@ language: cpp
 matrix:
   include:
 
-    # gcc-7
-    - os: linux
+#########
+    - name: "Build documentation"
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          packages:
+          - doxygen
+      before_script:
+      - mkdir cmake-build-test
+      - cd cmake-build-test
+      - cmake ..
+      script:
+      - make EasyExceptionDoc
+
+  #########
+    - name: "Test compiler GCC-7"
+      os: linux
       dist: xenial
       compiler: gcc
       addons:
@@ -14,11 +30,29 @@ matrix:
           packages:
             - g++-7
             - doxygen
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      before_install:
+        - eval "CC=gcc-7 && CXX=g++-7"
+      before_script:
+      - mkdir cmake-build-test
+      - cd cmake-build-test
+      - cmake ..
+      script:
+      - make
+      - test/unittest/EasyExceptionUnitTest
+      - test/integrationtest/EasyExceptionIntegrationTest
+      - ./CustomException
+      - ./JsonException
+      - ./SimpleException
+      - ./SimpleStacktrace
+      - ./DefaultLogging
+      - ./LoggerInheritance
+      - ./SignalHandler
+      - ./DefaultConfiguration || true
+      - ./UncaughtException || true
 
-    # clang 7.0
-    - os: linux
+#########
+    - name: "Test compiler Clang-7.0"
+      os: linux
       dist: xenial
       compiler: clang
       addons:
@@ -30,32 +64,25 @@ matrix:
             - libstdc++-7-dev
             - clang-tidy-7
             - doxygen
-      env:
-        - MATRIX_EVAL=""
+      before_script:
+      - mkdir cmake-build-test
+      - cd cmake-build-test
+      - cmake ..
+      script:
+      - make
+      - test/unittest/EasyExceptionUnitTest
+      - test/integrationtest/EasyExceptionIntegrationTest
+      - ./CustomException
+      - ./JsonException
+      - ./SimpleException
+      - ./SimpleStacktrace
+      - ./DefaultLogging
+      - ./LoggerInheritance
+      - ./SignalHandler
+      - ./DefaultConfiguration || true
+      - ./UncaughtException || true
 
-before_install:
-  - eval "${MATRIX_EVAL}"
-
-before_script:
-  - mkdir cmake-build-test
-  - cd cmake-build-test
-  - cmake ..
-
-script:
-  - make
-  - test/unittest/EasyExceptionUnitTest
-  - test/integrationtest/EasyExceptionIntegrationTest
-  - ./CustomException
-  - ./JsonException
-  - ./SimpleException
-  - ./SimpleStacktrace
-  - ./DefaultLogging
-  - ./LoggerInheritance
-  - ./SignalHandler
-  - ./DefaultConfiguration || true
-  - ./UncaughtException || true
-
-  - mkdir $TRAVIS_BUILD_DIR/cmake-build-tidy
-  - cd $TRAVIS_BUILD_DIR/cmake-build-tidy
-  - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-  - $TRAVIS_BUILD_DIR/tools/run-clang-tidy.py $TRAVIS_BUILD_DIR/cmake-build-tidy
+      - mkdir $TRAVIS_BUILD_DIR/cmake-build-tidy
+      - cd $TRAVIS_BUILD_DIR/cmake-build-tidy
+      - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+      - $TRAVIS_BUILD_DIR/tools/run-clang-tidy.py $TRAVIS_BUILD_DIR/cmake-build-tidy
