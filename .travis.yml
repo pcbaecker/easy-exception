@@ -17,6 +17,13 @@ matrix:
       - cmake ..
       script:
       - make EasyExceptionDoc
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        local_dir: cmake-build-test/docs/doc_doxygen/html
+        github_token: $GITHUB_TOKEN
+        on:
+          branch: master
 
   #########
     - name: "Test compiler GCC-7"
