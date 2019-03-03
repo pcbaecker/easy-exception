@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(EasyException)
 option(EE_USE_EXAMPLES "Use examples" ON)
 option(EE_USE_TESTS "Use tests" ON)
+option(EE_BUILD_DOCS "Build documentation" ON)
 
 ### Currently android seems to be not able to handle the c++17 definition in cmake
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
@@ -18,6 +19,10 @@ set_target_properties(EasyException PROPERTIES LINK_FLAGS -rdynamic)
 if (EE_USE_TESTS)
     add_subdirectory(test/unittest)
     add_subdirectory(test/integrationtest)
+endif()
+
+if (EE_BUILD_DOCS)
+    add_subdirectory(docs)
 endif()
 
 if (EE_USE_EXAMPLES)
